@@ -1,0 +1,387 @@
+[
+  {
+    "type": "recipe",
+    "name": "wooden-chest",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "wood",
+        "amount": 4.0
+      }
+    ],
+    "result": "wooden-chest"
+  },
+  {
+    "type": "recipe",
+    "name": "transport-belt",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "iron-plate",
+        "amount": 1.0
+      },
+      {
+        "name": "iron-gear-wheel",
+        "amount": 1.0
+      }
+    ],
+    "result": "transport-belt"
+  },
+  {
+    "type": "recipe",
+    "name": "assembling-machine-1",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "electronic-circuit",
+        "amount": 3.0
+      },
+      {
+        "name": "iron-gear-wheel",
+        "amount": 5.0
+      },
+      {
+        "name": "iron-plate",
+        "amount": 9.0
+      }
+    ],
+    "result": "assembling-machine-1"
+  },
+  {
+    "type": "recipe",
+    "name": "copper-cable",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "copper-plate",
+        "amount": 1.0
+      }
+    ],
+    "result": "copper-cable",
+    "result_count": 2
+  },
+  {
+    "type": "recipe",
+    "name": "copper-plate",
+    "category": "smelting",
+    "enabled": false,
+    "energy_required": 3.5,
+    "ingredients": [
+      {
+        "name": "copper-ore",
+        "amount": 1.0
+      }
+    ],
+    "result": "copper-plate"
+  },
+  {
+    "type": "recipe",
+    "name": "iron-plate",
+    "category": "smelting",
+    "enabled": false,
+    "energy_required": 3.5,
+    "ingredients": [
+      {
+        "name": "iron-ore",
+        "amount": 1.0
+      }
+    ],
+    "result": "iron-plate"
+  },
+  {
+    "type": "recipe",
+    "name": "electric-mining-drill",
+    "enabled": false,
+    "energy_required": 2,
+    "ingredients": [
+      {
+        "name": "electronic-circuit",
+        "amount": 3.0
+      },
+      {
+        "name": "iron-gear-wheel",
+        "amount": 5.0
+      },
+      {
+        "name": "iron-plate",
+        "amount": 10.0
+      }
+    ],
+    "result": "electric-mining-drill"
+  },
+  {
+    "type": "recipe",
+    "name": "electronic-circuit",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "iron-plate",
+        "amount": 1.0
+      },
+      {
+        "name": "copper-cable",
+        "amount": 3.0
+      }
+    ],
+    "result": "electronic-circuit"
+  },
+  {
+    "type": "recipe",
+    "name": "empty-barrel",
+    "enabled": false,
+    "energy_required": 1,
+    "ingredients": [
+      {
+        "name": "steel-plate",
+        "amount": 1.0
+      }
+    ],
+    "result": "empty-barrel"
+  },
+  {
+    "type": "recipe",
+    "name": "firearm-magazine",
+    "enabled": false,
+    "energy_required": 1,
+    "ingredients": [
+      {
+        "name": "iron-plate",
+        "amount": 4.0
+      }
+    ],
+    "result": "firearm-magazine"
+  },
+  {
+    "type": "recipe",
+    "name": "gun-turret",
+    "enabled": false,
+    "energy_required": 8,
+    "ingredients": [
+      {
+        "name": "iron-gear-wheel",
+        "amount": 10
+      },
+      {
+        "name": "copper-plate",
+        "amount": 10
+      },
+      {
+        "name": "iron-plate",
+        "amount": 20
+      }
+    ],
+    "result": "gun-turret"
+  },
+  {
+    "type": "recipe",
+    "name": "inserter",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "electronic-circuit",
+        "amount": 1
+      },
+      {
+        "name": "iron-gear-wheel",
+        "amount": 1
+      },
+      {
+        "name": "iron-plate",
+        "amount": 1
+      }
+    ],
+    "result": "inserter"
+  },
+  {
+    "type": "recipe",
+    "name": "iron-gear-wheel",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "iron-plate",
+        "amount": 2
+      }
+    ],
+    "result": "iron-gear-wheel"
+  },
+  {
+    "type": "recipe",
+    "name": "iron-stick",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "iron-plate",
+        "amount": 1
+      }
+    ],
+    "result": "iron-stick",
+    "result_count": 2
+  },
+  {
+    "type": "recipe",
+    "name": "pipe",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+      {
+        "name": "iron-plate",
+        "amount": 1
+      }
+    ],
+    "result": "pipe"
+  },
+  {
+    "type": "recipe",
+    "name": "plastic-bar",
+    "enabled": false,
+    "energy_required": 1,
+    "ingredients": [
+      {
+        "name": "coal",
+        "amount": 1
+      },
+      {
+        "name": "petroleum-gas",
+        "amount": 20
+      }
+    ],
+    "result": "plastic-bar",
+    "result_count": 2
+  },
+  {
+    "type": "recipe",
+    "name": "radar",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+ 	  {
+        "name": "electronic-circuit",
+        "amount": 5
+      },
+      {
+        "name": "iron-gear-wheel",
+        "amount": 5
+      },
+      {
+        "name": "iron-plate",
+        "amount": 10
+      }
+    ],
+    "result": "radar"
+  },
+  {
+    "type": "recipe",
+    "name": "solid-fuel-light-oil",
+    "enabled": false,
+    "energy_required": 3,
+    "ingredients": [
+ 	  {
+        "name": "light-oil",
+        "amount": 10
+      }
+    ],
+    "result": "solid-fuel"
+  },
+  {
+    "type": "recipe",
+    "name": "solid-fuel-heavy-oil",
+    "enabled": false,
+    "energy_required": 3,
+    "ingredients": [
+ 	  {
+        "name": "heavy-oil",
+        "amount": 20
+      }
+    ],
+    "result": "solid-fuel"
+  },
+  {
+    "type": "recipe",
+    "name": "solid-fuel-petroleum-gas",
+    "enabled": false,
+    "energy_required": 3,
+    "ingredients": [
+ 	  {
+        "name": "petroleum-gas",
+        "amount": 20
+      }
+    ],
+    "result": "solid-fuel"
+  },
+  {
+    "type": "recipe",
+    "name": "stone-brick",
+    "category": "smelting",
+    "enabled": false,
+    "energy_required": 3.5,
+    "ingredients": [
+ 	  {
+        "name": "stone",
+        "amount": 20
+      }
+    ],
+    "result": "stone-brick"
+  },
+  {
+    "type": "recipe",
+    "name": "sulfur",
+    "enabled": false,
+    "energy_required": 1,
+    "ingredients": [
+ 	  {
+        "name": "water",
+        "amount": 30
+      },
+ 	  {
+        "name": "petroleum-gas",
+        "amount": 30
+      }
+    ],
+    "result": "sulfur",
+    "result_count": 2
+  },
+  {
+    "type": "recipe",
+    "name": "sulfuric-acid",
+    "enabled": false,
+    "energy_required": 1,
+    "ingredients": [
+ 	  {
+        "name": "sulfur",
+        "amount": 5
+      },
+ 	  {
+        "name": "iron-plate",
+        "amount": 1
+      },
+ 	  {
+        "name": "water",
+        "amount": 100
+      }
+    ],
+    "result": "sulfuric-acid",
+    "result_count": 50
+  },
+  {
+    "type": "recipe",
+    "name": "wood",
+    "enabled": false,
+    "energy_required": 0.5,
+    "ingredients": [
+ 	  {
+        "name": "raw-wood",
+        "amount": 1
+      }
+    ],
+    "result": "wood",
+    "result_count": 2
+  }
+]

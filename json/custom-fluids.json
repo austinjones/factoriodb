@@ -1,0 +1,11 @@
+[
+  {
+    "type": "fluid",
+    "name": "steam",
+    "default_temperature": 25.0,
+    "heat_capacity": "?KJ",
+    "max_temperature": 1000.0,
+    "pressure_to_speed_ratio": 1,
+    "flow_to_energy_ratio": 1
+  }
+]

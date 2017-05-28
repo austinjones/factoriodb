@@ -1,0 +1,23 @@
+<project default="build">
+    <target name="clean">
+        <delete dir="gen"/>
+    </target>
+
+    <target name="build" depends="clean">
+        <mkdir dir="gen"/>
+        <java jar="lib/antlr-4.7-complete.jar" fork="true">  
+	         <arg value="-o"/>  
+	         <arg value="gen/com/factoriodb/luaparser"/>  
+	         <arg value="-package"/>  
+	         <arg value="com.factoriodb.luaparser"/>  
+	         <arg value="-visitor"/>
+	         <arg value="src-antlr/Lua.g4"/>  
+	    </java>
+	    <javac srcdir="gen"
+         destdir="bin"
+         classpath="lib/antlr-4.7-complete.jar"
+         debug="on"
+         source="1.8"
+  		/>
+    </target>
+</project>

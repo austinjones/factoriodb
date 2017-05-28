@@ -1,0 +1,381 @@
+[
+  {
+    "type": "item",
+    "name": "wooden-chest",
+    "subgroup": "storage",
+    "stack_size": 50.0
+  },
+  {
+    "type": "item",
+    "name": "transport-belt",
+    "subgroup": "belt",
+    "stack_size": 100.0
+  },
+  {
+    "type": "item",
+    "name": "assembling-machine-1",
+    "subgroup": "production-machine",
+    "stack_size": 50.0
+  },
+  {
+    "type": "item",
+    "name": "copper-cable",
+    "subgroup": "intermediate-product",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "copper-plate",
+    "subgroup": "intermediate-product",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "electric-mining-drill",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "electronic-circuit",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "firearm-magazine",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "firearm-magazine",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "gun-turret",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "inserter",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "iron-gear-wheel",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "iron-ore",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "iron-plate",
+    "stack_size": 100
+  },
+   {
+    "type": "module",
+    "name": "productivity-module",
+    "icon": "__base__/graphics/icons/productivity-module.png",
+    "flags": [
+      "goes-to-main-inventory"
+    ],
+    "subgroup": "module",
+    "category": "productivity",
+    "tier": 1.0,
+    "order": "c[productivity]-a[productivity-module-1]",
+    "stack_size": 50.0,
+    "default_request_amount": 10.0,
+    "effect": {
+      "productivity": {
+        "bonus": 0.04
+      },
+      "consumption": {
+        "bonus": 0.4
+      },
+      "pollution": {
+        "bonus": 0.05
+      },
+      "speed": {
+        "bonus": -0.15
+      }
+    },
+    "limitation": [
+      "sulfuric-acid",
+      "basic-oil-processing",
+      "advanced-oil-processing",
+      "coal-liquefaction",
+      "heavy-oil-cracking",
+      "light-oil-cracking",
+      "solid-fuel-from-light-oil",
+      "solid-fuel-from-heavy-oil",
+      "solid-fuel-from-petroleum-gas",
+      "lubricant",
+      "wood",
+      "iron-plate",
+      "copper-plate",
+      "steel-plate",
+      "stone-brick",
+      "sulfur",
+      "plastic-bar",
+      "empty-barrel",
+      "uranium-processing",
+      "copper-cable",
+      "iron-stick",
+      "iron-gear-wheel",
+      "electronic-circuit",
+      "advanced-circuit",
+      "processing-unit",
+      "engine-unit",
+      "electric-engine-unit",
+      "uranium-fuel-cell",
+      "explosives",
+      "battery",
+      "flying-robot-frame",
+      "low-density-structure",
+      "rocket-fuel",
+      "rocket-control-unit",
+      "rocket-part",
+      "science-pack-1",
+      "science-pack-2",
+      "science-pack-3",
+      "military-science-pack",
+      "production-science-pack",
+      "high-tech-science-pack"
+    ],
+    "limitation_message_key": "production-module-usable-only-on-intermediates"
+  },
+  {
+    "type": "module",
+    "name": "productivity-module-2",
+    "icon": "__base__/graphics/icons/productivity-module-2.png",
+    "flags": [
+      "goes-to-main-inventory"
+    ],
+    "subgroup": "module",
+    "category": "productivity",
+    "tier": 2.0,
+    "order": "c[productivity]-b[productivity-module-2]",
+    "stack_size": 50.0,
+    "default_request_amount": 10.0,
+    "effect": {
+      "productivity": {
+        "bonus": 0.06
+      },
+      "consumption": {
+        "bonus": 0.6
+      },
+      "pollution": {
+        "bonus": 0.075
+      },
+      "speed": {
+        "bonus": -0.15
+      }
+    },
+    "limitation": [
+      "sulfuric-acid",
+      "basic-oil-processing",
+      "advanced-oil-processing",
+      "coal-liquefaction",
+      "heavy-oil-cracking",
+      "light-oil-cracking",
+      "solid-fuel-from-light-oil",
+      "solid-fuel-from-heavy-oil",
+      "solid-fuel-from-petroleum-gas",
+      "lubricant",
+      "wood",
+      "iron-plate",
+      "copper-plate",
+      "steel-plate",
+      "stone-brick",
+      "sulfur",
+      "plastic-bar",
+      "empty-barrel",
+      "uranium-processing",
+      "copper-cable",
+      "iron-stick",
+      "iron-gear-wheel",
+      "electronic-circuit",
+      "advanced-circuit",
+      "processing-unit",
+      "engine-unit",
+      "electric-engine-unit",
+      "uranium-fuel-cell",
+      "explosives",
+      "battery",
+      "flying-robot-frame",
+      "low-density-structure",
+      "rocket-fuel",
+      "rocket-control-unit",
+      "rocket-part",
+      "science-pack-1",
+      "science-pack-2",
+      "science-pack-3",
+      "military-science-pack",
+      "production-science-pack",
+      "high-tech-science-pack"
+    ],
+    "limitation_message_key": "production-module-usable-only-on-intermediates"
+  },
+  {
+    "type": "item",
+    "name": "radar",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "iron-stick",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "pipe",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "stone-brick",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "stone-wall",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "wood",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "copper-ore",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "iron-ore",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "car",
+    "stack_size": 1
+  },
+  {
+    "type": "item",
+    "name": "cargo-wagon",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "combat-shotgun",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "flamethrower",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "fluid-wagon",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "green-wire",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "heavy-armor",
+    "stack_size": 10
+  },
+  {
+    "type": "item",
+    "name": "high-tech-science-pack",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "locomotive",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "military-science-pack",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "modular-armor",
+    "stack_size": 1
+  },
+  {
+    "type": "item",
+    "name": "power-armor",
+    "stack_size": 1
+  },
+  {
+    "type": "item",
+    "name": "power-armor-mk2",
+    "stack_size": 1
+  },
+  {
+    "type": "item",
+    "name": "production-science-pack",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "productivity-module-3",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "rail",
+    "stack_size": 100
+  },
+  {
+    "type": "item",
+    "name": "red-wire",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "rocket-launcher",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "science-pack-1",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "science-pack-2",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "science-pack-3",
+    "stack_size": 200
+  },
+  {
+    "type": "item",
+    "name": "shotgun",
+    "stack_size": 5
+  },
+  {
+    "type": "item",
+    "name": "steel-axe",
+    "stack_size": 20
+  },
+  {
+    "type": "item",
+    "name": "tank",
+    "stack_size": 1
+  }
+]
