@@ -73,6 +73,13 @@ public class ItemsStack implements Iterable<ItemStack> {
 	}
 
 	public static ItemsStack add(ItemsStack stack1, ItemsStack stack2) {
+        if(stack1 == null) {
+            return stack2;
+        }
+
+        if(stack2 == null) {
+            return stack1;
+        }
 		Map<String, Double> stacks = stack1.toMap();
 		Map<String, Double> stacks2 = stack2.toMap();
 		for(Map.Entry<String, Double> entry : stacks2.entrySet() ) {
@@ -184,6 +191,34 @@ public class ItemsStack implements Iterable<ItemStack> {
 
 		return new ItemsStack(newList);
 	}
+
+    public static ItemsStack mul(ItemsStack items, ItemsStack items2) {
+        if(items == null) {
+            return new ItemsStack();
+        }
+
+        ItemsStack result = new ItemsStack();
+        for(ItemStack item : items) {
+            double total = item.amount() * items2.getDouble(item.name());
+            result = ItemsStack.add(result, new ItemsStack(item.name(), total));
+        }
+
+        return result;
+    }
+
+    public static ItemsStack div(ItemsStack items, ItemsStack items2) {
+        if(items == null) {
+            return new ItemsStack();
+        }
+
+        ItemsStack result = new ItemsStack();
+        for(ItemStack item : items) {
+            double total = item.amount() / items2.getDouble(item.name());
+            result = ItemsStack.add(result, new ItemsStack(item.name(), total));
+        }
+
+        return result;
+    }
 
 	public ItemsStack throttle(ItemsStack input) {
 		ArrayList<ItemStack> output = new ArrayList<>(this.items.size());

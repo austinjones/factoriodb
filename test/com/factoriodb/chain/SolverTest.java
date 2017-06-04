@@ -6,6 +6,7 @@ import com.factoriodb.model.Model;
 import com.factoriodb.Solver;
 import com.factoriodb.model.ItemsStack;
 import com.factoriodb.model.ModelUtils;
+import com.factoriodb.recipe.RecipeUtils;
 
 import org.junit.Test;
 
@@ -15,6 +16,33 @@ import static org.junit.Assert.*;
  * @author austinjones
  */
 public class SolverTest {
+    @Test
+    public void testTransitive() {
+        Model m = ModelUtils.getTestModel();
+        RecipeUtils ru = new RecipeUtils(m);
+
+        Pipe raw = ru.pipe("raw-fluid");
+        raw.markInput();
+
+        Crafter refinery = ru.craftRecipe("fluid-processing");
+        refinery.connectFrom(raw);
+
+        Pipe spaceFluid = ru.pipe("space-fluid");
+        spaceFluid.connectFrom(refinery);
+
+        Pipe badFluid = ru.pipe("bad-fluid");
+        badFluid.connectFrom(refinery);
+
+        Crafter cracking = ru.craftRecipe("bad-fluid-cracking");
+        cracking.connectFrom(badFluid);
+        spaceFluid.connectFrom(cracking);
+
+        Solver solver = new Solver(m, spaceFluid);
+        Solver.SolveNode node = solver.solveForOutput(spaceFluid, new ItemsStack("space-fluid", 4));
+
+        Main.print(node, 0);
+    }
+
     @Test
     public void testSolver() {
         Model m = ModelUtils.getTestModel();

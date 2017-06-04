@@ -27,7 +27,7 @@ public class Inserter extends Connection {
 
     @Override
     public ItemsStack getOutputRatio(ItemsStack inputRatio) {
-        return source.getOutputRatio(inputRatio);
+        return inputRatio;
     }
 
     @Override

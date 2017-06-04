@@ -7,6 +7,8 @@ import com.factoriodb.com.factoriodb.input.InputReader;
 import com.factoriodb.com.factoriodb.input.InputRecipe;
 import com.factoriodb.com.factoriodb.input.InputRecipeItem;
 
+import java.util.ArrayList;
+
 /**
  * @author austinjones
  */
@@ -41,16 +43,52 @@ public class ModelUtils {
         science.result_count = 1;
         science.energy_required = 50;
 
-        InputRecipe[] recipes = new InputRecipe[] {
-                smelting,
-                intermediate,
-                science
-        };
+        InputFluid rawFluid = new InputFluid();
+        rawFluid.name = "raw-fluid";
 
         InputFluid spaceFluid = new InputFluid();
         spaceFluid.name = "space-fluid";
 
-        InputFluid[] fluids = new InputFluid[] {spaceFluid};
+        InputFluid badFluid = new InputFluid();
+        badFluid.name = "bad-fluid";
+
+        InputFluid[] fluids = new InputFluid[] {rawFluid, spaceFluid, badFluid};
+
+        InputRecipe refinery = new InputRecipe();
+        refinery.name = "fluid-processing";
+        refinery.category = "oil-processing";
+        refinery.ingredients.add(new InputRecipeItem("raw-fluid", 1));
+
+        refinery.results = new ArrayList<>();
+        InputRecipeItem out1 = new InputRecipeItem();
+        out1.amount = 1;
+        out1.name = "space-fluid";
+        refinery.results.add(out1);
+
+        InputRecipeItem out2 = new InputRecipeItem();
+        out2.amount = 2;
+        out2.name = "bad-fluid";
+        refinery.results.add(out2);
+
+        refinery.result_count = 1;
+        refinery.energy_required = 2;
+
+        InputRecipe cracking = new InputRecipe();
+        cracking.name = "bad-fluid-cracking";
+        cracking.category = "chemistry";
+        cracking.ingredients.add(new InputRecipeItem("bad-fluid", 1));
+
+        cracking.result = "space-fluid";
+        cracking.result_count = 1;
+        cracking.energy_required = 2;
+
+        InputRecipe[] recipes = new InputRecipe[] {
+                smelting,
+                intermediate,
+                science,
+                refinery,
+                cracking
+        };
 
         Items itemsObj = InputReader.renderItems(items,fluids);
         Recipes recipesObj = InputReader.renderRecipes(itemsObj, recipes);

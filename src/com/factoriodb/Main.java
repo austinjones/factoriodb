@@ -19,15 +19,16 @@ public class Main {
         System.out.println("Missing items: " + m.getMissingItems());
 		System.out.println("Missing recipes: " + m.getMissingRecipes());
 
-        System.out.println("basic-oil:");
-        basicOil(m);
-
-        System.out.println("");
-        System.out.println("");
-        System.out.println("");
 
         System.out.println("advanced-oil:");
         advancedOil(m);
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+
+        System.out.println("basic-oil:");
+        basicOil(m);
 
         System.out.println("");
         System.out.println("");

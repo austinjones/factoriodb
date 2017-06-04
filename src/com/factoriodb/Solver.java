@@ -1,7 +1,10 @@
 package com.factoriodb;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.factoriodb.chain.Entity;
 import com.factoriodb.chain.option.EntityOption;
@@ -17,33 +20,45 @@ public class Solver {
 		this.output = output;
 	}
 
-    public static class RatioNode {
+    public static class SolveNode implements Iterable<SolveNode> {
         public Entity entity;
+        public List<SolveNode> sources = new ArrayList<>();
+
         public ItemsStack adjustedInput;
         public ItemsStack adjustedOutput;
-        public List<RatioNode> sources = new ArrayList<>();
+
+        public List<SolveOption> options = new ArrayList<>();
+        public ItemsStack request;
+
+        @Override
+        public Iterator<SolveNode> iterator() {
+            return sources.iterator();
+        }
+
+        @Override
+        public String toString() {
+            return entity.toString();
+        }
     }
 
-    public RatioNode solveRatio(Entity entity) {
-        RatioNode node = new RatioNode();
-        node.entity = entity;
 
-        if(entity.isInput()) {
+    public void solveRatio(SolveNode node) {
+        Entity entity = node.entity;
+
+        if(node.entity.isInput()) {
             node.adjustedInput = entity.getInputRatio();
             node.adjustedOutput = entity.getOutputRatio();
-            return node;
+            return;
         }
 
         ItemsStack input = new ItemsStack();
-        for (Entity source : entity.getInputs()) {
-            RatioNode sourceNode = solveRatio(source);
-            node.sources.add(sourceNode);
-
-            input = ItemsStack.add(input, sourceNode.adjustedOutput);
+        for (SolveNode source : node.sources) {
+            solveRatio(source);
+            input = ItemsStack.add(input, source.adjustedOutput);
         }
 
+        node.adjustedInput = input;
         node.adjustedOutput = entity.getOutputRatio(input);
-        return node;
     }
 	
 	public static class SolveOption {
@@ -60,29 +75,18 @@ public class Solver {
 		}
 	}
 	
-	public static class SolveNode {
-		public Entity entity;
-		public List<SolveOption> options = new ArrayList<>();
-		public List<SolveNode> sources = new ArrayList<>();
-		
-		@Override
-		public String toString() {
-			return entity.toString();
-		}
-	}
-	
-//	public SolveNode solve(Entity entity) {
-//		SolveNode result = solveForInput(entity);
+//	public Node solve(Entity entity) {
+//		Node result = solveForInput(entity);
 //		reduceToInput(result, result.input);
 //		return result;
 //	}
 	
-//	private SolveNode constrainOutput(Entity entity, ItemsFlow maxOutput) {
-//		SolveNode result = new SolveNode();
+//	private Node constrainOutput(Entity entity, ItemsFlow maxOutput) {
+//		Node result = new Node();
 //		EntityOption result = entity.optionAboveOutput(maxOutput);
 //		if (maxInput.anyMatch((m) -> m.amount() < maxInput.getDouble(m.name()))) {
 //			for(Entity source : entity.getInputs()) {
-//				SolveNode sourceNode = constrainOutput(source, maxInput);
+//				Node sourceNode = constrainOutput(source, maxInput);
 //				remainingInput = ItemsFlow.sub(remainingInput, sourceNode.output);
 //			}
 //		}
@@ -94,19 +98,19 @@ public class Solver {
 //		return result;
 //	}
 //
-//	public SolveNode solveForInput(Entity entity) {
-//		SolveNode result = new SolveNode();
+//	public Node solveForInput(Entity entity) {
+//		Node result = new Node();
 //		
 //		ItemsFlow input = new ItemsFlow();
 //		for(Entity source : entity.getInputs()) {
-//			SolveNode sourceNode = solveForInput(source);
+//			Node sourceNode = solveForInput(source);
 //			input = ItemsFlow.add(input, sourceNode.output);
 //		}
 //		
 //		EntityOption option = entity.optionAboveInput(input);
 //		ItemsFlow maxInput = option.requestedFlow();
 //		for(Entity source : entity.getInputs()) {
-//			SolveNode trueSource = constrainOutput(source, maxInput);
+//			Node trueSource = constrainOutput(source, maxInput);
 //		}
 //		
 //		result.option = option;
@@ -115,16 +119,16 @@ public class Solver {
 //		return result;
 //	}
 	
-//	private void reduceToInput(SolveNode node, ItemsFlow remainingInput) {
+//	private void reduceToInput(Node node, ItemsFlow remainingInput) {
 //		ItemsFlow availableInput = remainingInput;
-//		for(SolveNode source : node.sources) {
+//		for(Node source : node.sources) {
 //			reduceToInput(source, availableInput);
 //			availableInput = ItemsFlow.sub(availableInput, source.output);
 //		}
 //	}
 	
-//	public SolveNode solveForOutput(Entity entity, ItemsFlow requestedOutput) {
-//		SolveNode node = new SolveNode();
+//	public Node solveForOutput(Entity entity, ItemsFlow requestedOutput) {
+//		Node node = new Node();
 //		
 //		ItemsFlow input = new ItemsFlow();
 ////		// pick an output option that can satisfy the output
@@ -138,7 +142,7 @@ public class Solver {
 //		
 //		for(Entity source : entity.getInputs()) {
 //			// recursively solve for the output of sources
-//			SolveNode childNode = solveForOutput(source, request);
+//			Node childNode = solveForOutput(source, request);
 //			requestRemaining = ItemsFlow.sub(requestRemaining, childNode.output);
 //			input = ItemsFlow.add(input, childNode.output);
 //			node.sources.add(node);
@@ -167,61 +171,72 @@ public class Solver {
 //		return node;
 //	}
 
-    public SolveNode solveForOutput(Entity entity, final ItemsStack requestedOutput) {
-        RatioNode ratio = solveRatio(entity);
-        return solveRatioNode(ratio, requestedOutput);
+    public SolveNode parse(Entity entity) {
+        return parseRecurse(new HashMap<>(), entity);
     }
 
-    private SolveNode solveRatioNode(RatioNode ratio, final ItemsStack requestedOutput) {
-		Entity entity = ratio.entity;
+    private SolveNode parseRecurse(Map<Entity, SolveNode> map, Entity entity) {
+        SolveNode node = map.get(entity);
+        if(node != null) {
+            return node;
+        }
 
-        SolveNode node = new SolveNode();
-		node.entity = entity;
-		
-//		// pick an output option that can satisfy the output
-		List<EntityOption> options = entity.optionsAboveOutput(requestedOutput);
-		ItemsStack[] requests = options.stream().map((e) -> e.requestedInputLimited(requestedOutput))
-				.toArray(ItemsStack[]::new);
+        node = new SolveNode();
+        node.entity = entity;
+        map.put(entity, node);
+
+        if(entity.isInput()) {
+            return node;
+        }
+
+        for(Entity source : entity.getInputs()) {
+            SolveNode sourceNode = parseRecurse(map, source);
+            node.sources.add(sourceNode);
+        }
+
+        return node;
+    }
+
+    public SolveNode solveForOutput(Entity entity, final ItemsStack requestedOutput) {
+        SolveNode node = parse(entity);
+        solveRatio(node);
+        solveRequest(node, requestedOutput);
+        solveResponse(node);
+        return node;
+    }
+
+    private void solveResponse(SolveNode node) {
+        Entity entity = node.entity;
+
         // assume the player picks the best option
         // this way, the input belt will always be saturated
-		ItemsStack request = ItemsStack.max(requests);
+        ItemsStack request = node.request;
 
-		ItemsStack requestRemaining = request;
-		ItemsStack input = new ItemsStack();
-		
-		if(entity.isInput()) {
-			input = request;
-		} else {
-			for(Entity source : entity.getInputs()) {
-				SolveOption solveOption = new SolveOption();
-				// recursively solve for the output of sources
-                ItemsStack sourceRequest = request.filter(source.getOutputRatio().itemNames());
-				SolveNode childNode = solveForOutput(source, request);
-				ItemsStack[] outputs = childNode.options.stream()
-						.map((e) -> e.output)
-						.toArray(ItemsStack[]::new);
+        ItemsStack input = new ItemsStack();
 
-                // assume the player picks the worst option
-                // subtract that from the request, and add to input
-                // this way, the input belt will always be saturated
-				ItemsStack minInput = ItemsStack.min(outputs);
-				requestRemaining = ItemsStack.sub(requestRemaining, minInput);
-				input = ItemsStack.add(input, minInput);
-				
-				node.sources.add(childNode);
-			}
-		}
+        if(entity.isInput()) {
+            input = request;
+        } else {
+            for(SolveNode sourceNode : node.sources) {
+                solveResponse(sourceNode);
 
-		for(EntityOption option : options) {
-			SolveOption solveOption = new SolveOption();
-            solveOption.usageRatio = input.total() / option.maxInput();
-			solveOption.input = input;
-            solveOption.inputRequest = request;
-			solveOption.output = option.availableOutputLimited(requestedOutput, input);
-			solveOption.option = option;
+                ItemsStack[] outputs = sourceNode.options.stream()
+                        .map((e) -> e.output)
+                        .toArray(ItemsStack[]::new);
 
-            node.options.add(solveOption);
-		}
+                // pick the minimum
+                ItemsStack minInput = ItemsStack.min(outputs);
+                input = ItemsStack.add(input, minInput);
+            }
+        }
+
+
+        for(SolveOption so : node.options) {
+            EntityOption option = so.option;
+            so.usageRatio = input.total() / option.maxInput();
+            so.input = input;
+            so.output = option.availableOutputLimited(node.request, input);
+        }
 
         for(SolveOption option : node.options) {
             for(SolveOption compare : node.options) {
@@ -240,14 +255,137 @@ public class Solver {
 //		System.out.println("available input: " + input);
 //		System.out.println("produced output: " + result);
 //		System.out.println();
-		
 
 
-		
-		// calculate the output amount of the final option with the input
 
-		return node;
-	}
+
+        // calculate the output amount of the final option with the input
+
+
+    }
+
+    private void solveRequest(SolveNode node, ItemsStack requestedOutput) {
+        Entity entity = node.entity;
+//        System.out.println(ratio.adjustedInput);
+//        System.out.println(ratio.adjustedOutput);
+
+        final ItemsStack finalRequestedOutput = ItemsStack.add(node.request, requestedOutput);
+
+        //		// pick an output option that can satisfy the output
+        List<EntityOption> options = entity.optionsAboveOutput(finalRequestedOutput);
+
+        ItemsStack[] requests = options.stream().map((e) -> e.requestedInputLimited(finalRequestedOutput))
+                .toArray(ItemsStack[]::new);
+
+        // assume the player picks the best option
+        // this way, the input belt will always be saturated
+        ItemsStack request = ItemsStack.max(requests);
+        node.request = request;
+
+        for (SolveNode sourceNode : node.sources) {
+            Entity source = sourceNode.entity;
+
+//                System.out.println(entity + " <- " + source);
+            ItemsStack adjusted = ItemsStack.div(sourceNode.adjustedOutput, node.adjustedInput);
+            ItemsStack adjustedRequest = ItemsStack.mul(request, adjusted);
+//                System.out.println(adjustedRequest);
+            ItemsStack sourceRequest = adjustedRequest.filter(source.getOutputRatio().itemNames());
+
+            solveRequest(sourceNode, sourceRequest);
+        }
+
+        node.options.clear();
+        for(EntityOption option : options) {
+            SolveOption solveOption = new SolveOption();
+            solveOption.inputRequest = request;
+            solveOption.option = option;
+
+            node.options.add(solveOption);
+        }
+    }
+
+//    private Node solveNode(Node ratio, final ItemsStack requestedOutput) {
+//		Entity entity = ratio.entity;
+////        System.out.println(ratio.adjustedInput);
+////        System.out.println(ratio.adjustedOutput);
+//
+//        Node node = new Node();
+//		node.entity = entity;
+//
+////		// pick an output option that can satisfy the output
+//		List<EntityOption> options = entity.optionsAboveOutput(requestedOutput);
+//		ItemsStack[] requests = options.stream().map((e) -> e.requestedInputLimited(requestedOutput))
+//				.toArray(ItemsStack[]::new);
+//        // assume the player picks the best option
+//        // this way, the input belt will always be saturated
+//		ItemsStack request = ItemsStack.max(requests);
+//
+//		ItemsStack input = new ItemsStack();
+//
+//		if(entity.isInput()) {
+//			input = request;
+//		} else {
+//			for(Node sourceRatio : ratio.sources) {
+//                Entity source = sourceRatio.entity;
+//
+////                System.out.println(entity + " <- " + source);
+//                ItemsStack adjusted = ItemsStack.div(sourceRatio.adjustedOutput, ratio.adjustedInput);
+//                ItemsStack adjustedRequest = ItemsStack.mul(request, adjusted);
+////                System.out.println(adjustedRequest);
+//				SolveOption solveOption = new SolveOption();
+//				// recursively solve for the output of sources
+//                ItemsStack sourceRequest = adjustedRequest.filter(source.getOutputRatio().itemNames());
+//				Node childNode = solveForOutput(source, adjustedRequest);
+//
+//                ItemsStack[] outputs = childNode.options.stream()
+//						.map((e) -> e.output)
+//						.toArray(ItemsStack[]::new);
+//
+//                // pick the minimum
+//                ItemsStack minInput = ItemsStack.min(outputs);
+//                input = ItemsStack.add(input, minInput);
+//
+//				node.sources.add(childNode);
+//			}
+//		}
+//
+//		for(EntityOption option : options) {
+//			SolveOption solveOption = new SolveOption();
+//            solveOption.usageRatio = input.total() / option.maxInput();
+//			solveOption.input = input;
+//            solveOption.inputRequest = request;
+//			solveOption.output = option.availableOutputLimited(requestedOutput, input);
+//			solveOption.option = option;
+//
+//            node.options.add(solveOption);
+//		}
+//
+//        for(SolveOption option : node.options) {
+//            for(SolveOption compare : node.options) {
+//                boolean equalPlacement = option.option.placementCost() == compare.option.placementCost();
+//                boolean greaterCost = option.option.constructionCost() > compare.option.constructionCost();
+//
+//                if(equalPlacement && greaterCost) {
+//                    option.unnecessary = true;
+//                    break;
+//                }
+//            }
+//        }
+//
+////		System.out.println(option);
+////		System.out.println("requested input: " + request);
+////		System.out.println("available input: " + input);
+////		System.out.println("produced output: " + result);
+////		System.out.println();
+//
+//
+//
+//
+//		// calculate the output amount of the final option with the input
+//
+//		return node;
+//	}
+
 //	private ItemsFlow getRequest(Entity entity, ItemsFlow requestedOutput) {
 //		if(entity.getCrafter().isPresent()) {
 //			Crafter craftItem = entity.getCrafter().get();
@@ -272,8 +410,8 @@ public class Solver {
 //		}
 //	}
 	
-//	public SolveNode solveForOutput(Crafter craftItem, ItemsFlow requestedOutput) {
-//		SolveNode result = new SolveNode();
+//	public Node solveForOutput(Crafter craftItem, ItemsFlow requestedOutput) {
+//		Node result = new Node();
 //		
 //		ItemsFlow input = new ItemsFlow();
 ////		// pick an output option that can satisfy the output
@@ -283,7 +421,7 @@ public class Solver {
 //		ItemsFlow request = option.requestedInputLimited(requestedOutput);
 //		for(Entity source : craftItem.getInputs()) {
 //			// recursively solve for the output of sources
-//			SolveNode node = solveForOutput(source, requestedOutput);
+//			Node node = solveForOutput(source, requestedOutput);
 //			request = ItemsFlow.sub(request, node.output);
 //			input = ItemsFlow.add(input, node.output);
 //			result.sources.add(node);
@@ -301,8 +439,8 @@ public class Solver {
 //		return result;
 //	}
 //	
-//	public SolveNode solveForOutput(Connection connection, ItemsFlow requestedOutput) {
-//		SolveNode result = new SolveNode();
+//	public Node solveForOutput(Connection connection, ItemsFlow requestedOutput) {
+//		Node result = new Node();
 //		
 //		ItemsFlow input = new ItemsFlow();
 ////		// pick an output option that can satisfy the output
@@ -312,7 +450,7 @@ public class Solver {
 //		ItemsFlow request = requestedOutput;
 //		for(Entity source : option.getInputs()) {
 //			// recursively solve for the output of sources
-//			SolveNode node = solveForOutput(source, requestedOutput);
+//			Node node = solveForOutput(source, requestedOutput);
 //			request = ItemsFlow.sub(request, node.output);
 //			input = ItemsFlow.add(input, node.output);
 //			result.sources.add(node);

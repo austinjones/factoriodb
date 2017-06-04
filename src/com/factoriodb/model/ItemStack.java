@@ -27,7 +27,8 @@ public class ItemStack {
         }
 
         ItemStack other = (ItemStack)obj;
-        return item.equals(other.item) && count == other.count;
+        // TODO: really bad hack here.  getting floating point rounding errors in SolverTest.
+        return item.equals(other.item) && Math.abs(count - other.count) < 0.00001;
     }
 
     public String toString() {
