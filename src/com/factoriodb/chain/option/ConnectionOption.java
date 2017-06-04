@@ -1,11 +1,7 @@
 package com.factoriodb.chain.option;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.factoriodb.chain.Connection;
-import com.factoriodb.model.Item;
-import com.factoriodb.model.ItemsFlow;
+import com.factoriodb.model.ItemsStack;
 
 public abstract class ConnectionOption extends EntityOption {
 	private String optionDescription;
@@ -15,21 +11,26 @@ public abstract class ConnectionOption extends EntityOption {
 		this.self = self;
 		this.optionDescription = optionDescription;
 	}
-	
+
+    @Override
+    public String name() {
+        return optionDescription;
+    }
+
 	@Override
-	public ItemsFlow availableOutputLimited(ItemsFlow requestedOutput, ItemsFlow input) {
-		ItemsFlow best = availableOutputLimited(requestedOutput);
+	public ItemsStack availableOutputLimited(ItemsStack requestedOutput, ItemsStack input) {
+		ItemsStack best = availableOutputLimited(requestedOutput);
 		return best.throttle(input);
 	}
 	
 //	@Override
-//	public List<Item> getAvailableItems() {
-//		return self.getAvailableItems();
+//	public List<Item> getOutputRatio() {
+//		return self.getOutputRatio();
 //	}
 //
 //	@Override
-//	public List<Item> getRequestedItems() {
-//		return self.getRequestedItems();
+//	public List<Item> getInputRatio() {
+//		return self.getInputRatio();
 //	}
 //
 //	@Override

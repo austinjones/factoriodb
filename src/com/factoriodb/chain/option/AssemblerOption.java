@@ -1,25 +1,20 @@
 package com.factoriodb.chain.option;
 
-import com.factoriodb.chain.Assembler;
-import com.factoriodb.model.Item;
-import com.factoriodb.model.ItemsFlow;
+import com.factoriodb.chain.Crafter;
+import com.factoriodb.model.ItemStack;
+import com.factoriodb.model.ItemsStack;
 import com.factoriodb.model.Recipe;
-import com.factoriodb.model.RecipeIngredient;
 
 public class AssemblerOption extends CrafterOption {
 	private static double SPEED_1 = 0.5;
-	private Assembler assembler;
+	private Crafter crafter;
 	private double speed;
 	
-	public AssemblerOption(Assembler entity, String name, double speed) {
+	public AssemblerOption(Crafter entity, String name, double speed) {
 		super(entity, name);
 		
-		this.assembler = entity;
+		this.crafter = entity;
 		this.speed = speed;
-	}
-
-	public enum AssemblerType {
-		
 	}
 	
 //	@Override
@@ -30,9 +25,9 @@ public class AssemblerOption extends CrafterOption {
 //		double minThroughput = Double.MAX_VALUE;
 //		
 //		for(RecipeIngredient ingredient : r.ingredients) {
-//			double flow = input.getDouble(ingredient.name);
+//			double amount = input.getDouble(ingredient.name);
 //			double required = speed * ingredient.amount / r.energy_required;
-//			double throughput = flow / required;
+//			double throughput = amount / required;
 //			if(throughput < minThroughput) {
 //				minThroughput = throughput;
 //			}
@@ -46,58 +41,59 @@ public class AssemblerOption extends CrafterOption {
 //			minThroughput = 1;
 //		}
 //		
-//		double flow = speed * minThroughput * r.result_count / r.energy_required;
-//		return new ItemsFlow(i.name, flow);
+//		double amount = speed * minThroughput * r.result_count / r.energy_required;
+//		return new ItemsFlow(i.name, amount);
 //	}
 
 	@Override
-	public ItemsFlow requestedInputLimited(ItemsFlow requestedOutput) {
-		Item i = assembler.getItem();
-		Recipe r = assembler.getRecipe();
-		
-		double flow = requestedOutput.getDouble(i.name);
-		double rate = flow / r.result_count; 
-		
-		return requestedInput(rate);
+	public ItemsStack requestedInputLimited(ItemsStack requestedOutput) {
+		Recipe r = crafter.getRecipe();
+
+        double maxRate = 0;
+        for(ItemStack item : r.getOutput()) {
+            double flow = requestedOutput.getDouble(item.name());
+            double rate = flow / (speed * item.amount() / r.getEnergyRequired());
+            if(rate > maxRate) {
+                maxRate = rate;
+            }
+        }
+
+		return requested(maxRate);
 	}
 
 //	@Override
-//	public ItemsFlow requestedInput() {
-//		return requestedInput(1.0);
+//	public ItemsFlow requested() {
+//		return requested(1.0);
 //	}
 	
-	private ItemsFlow requestedInput(double rate) {
-		Item i = assembler.getItem();
-		Recipe r = assembler.getRecipe();
+	private ItemsStack requested(double rate) {
+		Recipe r = crafter.getRecipe();
 		
-		ItemsFlow request = new ItemsFlow();
-		for(RecipeIngredient ing : r.ingredients) {
-			double ingredientFlow = speed * rate * ing.amount / r.energy_required;
-			request = ItemsFlow.add(request, new ItemsFlow(ing.name, ingredientFlow));
+		ItemsStack request = new ItemsStack();
+		for(ItemStack ing : r.getInput()) {
+			double ingredientFlow = speed * rate * ing.amount() / r.getEnergyRequired();
+			request = ItemsStack.add(request, new ItemsStack(ing.name(), ingredientFlow));
 		}
 
 		return request;
 	}
 
 	@Override
-	public ItemsFlow availableOutputLimited(ItemsFlow output) {
-		Item i = assembler.getItem();
-		Recipe r = assembler.getRecipe();
-		
-		double rate = speed * r.result_count / r.energy_required;
-		return new ItemsFlow(i.name, rate);
+	public ItemsStack availableOutputLimited(ItemsStack output) {
+		Recipe r = crafter.getRecipe();
+        double rate = speed / r.getEnergyRequired();
+		return ItemsStack.mul(r.getOutput(), rate);
 	}
 
 	@Override
-	public ItemsFlow availableOutputLimited(ItemsFlow requestedOutput, ItemsFlow input) {
-		Item i = assembler.getItem();
-		Recipe r = assembler.getRecipe();
+	public ItemsStack availableOutputLimited(ItemsStack requestedOutput, ItemsStack input) {
+		Recipe r = crafter.getRecipe();
 		
 		double minThroughput = Double.MAX_VALUE;
 		
-		for(RecipeIngredient ingredient : r.ingredients) {
-			double flow = input.getDouble(ingredient.name);
-			double required = speed * ingredient.amount / r.energy_required;
+		for(ItemStack ingredient : r.getInput()) {
+			double flow = input.getDouble(ingredient.name());
+			double required = speed * ingredient.amount() / r.getEnergyRequired();
 			double throughput = flow / required;
 			if(throughput < minThroughput) {
 				minThroughput = throughput;
@@ -105,14 +101,34 @@ public class AssemblerOption extends CrafterOption {
 		}
 		
 		if(minThroughput == Double.MAX_VALUE) {
-			return new ItemsFlow();
+			return new ItemsStack();
 		}
 		
 		if(minThroughput > 1) {
 			minThroughput = 1;
 		}
 		
-		double flow = speed * minThroughput * r.result_count / r.energy_required;
-		return new ItemsFlow(i.name, flow);
+		double rate = speed * minThroughput / r.getEnergyRequired();
+		return ItemsStack.mul(r.getOutput(), rate);
 	}
+
+    @Override
+    public double constructionCost() {
+        return speed;
+    }
+
+    @Override
+    public double placementCost() {
+        return 1;
+    }
+
+    @Override
+    public double maxInput() {
+        return requested(1.0).total();
+    }
+
+    @Override
+    public double maxOutput() {
+        return availableOutputLimited(null).total();
+    }
 }

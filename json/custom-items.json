@@ -377,5 +377,20 @@
     "type": "item",
     "name": "tank",
     "stack_size": 1
+  },
+  {
+    "type": "item",
+    "name": "coal",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "stone",
+    "stack_size": 50
+  },
+  {
+    "type": "item",
+    "name": "raw-wood",
+    "stack_size": 50
   }
 ]

@@ -1,6 +1,6 @@
-package com.factoriodb.model;
+package com.factoriodb.com.factoriodb.input;
 
-public class Fluid {
+public class InputFluid {
 	public String name;
 	public double default_temperature;
 	public double max_temperature;

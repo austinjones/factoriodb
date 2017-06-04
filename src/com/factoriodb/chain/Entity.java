@@ -5,33 +5,34 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import com.factoriodb.chain.option.ConnectionOption;
 import com.factoriodb.chain.option.EntityOption;
 import com.factoriodb.chain.option.ReplicatedOption;
-import com.factoriodb.model.ItemsFlow;
+import com.factoriodb.model.ItemsStack;
 
 
-public abstract class Entity implements InserterSource, InserterTarget {
+public abstract class Entity {
 	protected List<Entity> inputs = new ArrayList<>();
 	protected List<Entity> outputs = new ArrayList<>();
 	
 	protected boolean isInput;
 
-	public abstract Collection<? extends EntityOption> options();
+    public abstract ItemsStack getOutputRatio();
+    public abstract ItemsStack getOutputRatio(ItemsStack inputRatio);
+    public abstract ItemsStack getInputRatio();
+    public abstract Collection<? extends EntityOption> options();
 	
 	/**
-	 * @param maxOutput
 	 * @return the option above (and closest to) the provided output assuming all inputs are satisfied
 	 */
-	public List<EntityOption> optionsAboveOutput(ItemsFlow output) {
+	public List<EntityOption> optionsAboveOutput(ItemsStack output) {
 		List<EntityOption> options = new ArrayList<>();
 		
 		for(EntityOption opt : this.options()) {
 			// TODO: bug here!  0s maybe shouldn't be counted? idk
 			// belt filters items and procduces 0s
-			ItemsFlow flow = opt.availableOutputLimited(output);
-			double ratio = flow.minratio(output);
-			int count = (int)Math.ceil(1/ratio);
+			ItemsStack flow = opt.availableOutputLimited(output);
+			double ratio = output.maxratio(flow);
+			int count = (int)Math.ceil(ratio);
 			
 			EntityOption replicated = new ReplicatedOption(opt, count);
 			options.add(replicated);
@@ -41,17 +42,16 @@ public abstract class Entity implements InserterSource, InserterTarget {
 	}
 	
 	/**
-	 * @param maxOutput
 	 * @return the option above (and closest to) the provided output assuming all inputs are satisfied
 	 */
-	public EntityOption optionAboveOutput(ItemsFlow output) {
+	public EntityOption optionAboveOutput(ItemsStack output) {
 		double bestRatio = 0;
 		EntityOption bestOption = null;
 		
 		for(EntityOption opt : this.options()) {
 			// TODO: bug here!  0s maybe shouldn't be counted? idk
 			// belt filters items and procduces 0s
-			ItemsFlow flow = opt.availableOutputLimited(output);
+			ItemsStack flow = opt.availableOutputLimited(output);
 			double ratio = flow.minratio(output);
 			int count = (int)Math.ceil(1/ratio);
 			
@@ -69,7 +69,13 @@ public abstract class Entity implements InserterSource, InserterTarget {
 		
 		return bestOption;
 	}
-	
+
+    public void connectFrom(Entity... inserterSources) {
+        for(Entity source : inserterSources) {
+            inputs.add(source);
+        }
+    }
+
 	public void insertFrom(Entity... inserterSources) {
 		for(Entity source : inserterSources) {
 			Inserter input = new Inserter(source, this);
@@ -115,10 +121,10 @@ public abstract class Entity implements InserterSource, InserterTarget {
 //		EntityOption bestOption = null;
 //		
 //		for(EntityOption opt : this.options()) {
-//			ItemsFlow flow = opt.requestedInput();
-//			ItemsFlow surplus = flow.sub(input, flow);
+//			ItemsFlow amount = opt.requestedInput();
+//			ItemsFlow surplus = amount.sub(input, amount);
 //			
-//			if (surplus.anyMatch((r) -> r.flow() < 0) 
+//			if (surplus.anyMatch((r) -> r.amount() < 0)
 //					&& surplus.totalIf((f) -> f > 0) < bestSurplus.totalIf((f) -> f > 0)) {
 //				bestSurplus = surplus;
 //				bestOption = opt;

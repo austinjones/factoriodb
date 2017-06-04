@@ -1,21 +1,21 @@
 package com.factoriodb.chain.option;
 
 import com.factoriodb.chain.Belt;
-import com.factoriodb.model.ItemsFlow;
+import com.factoriodb.model.ItemsStack;
 
 public class BeltOption extends ConnectionOption {
 	private static double MAX_FLOW = 13.33;
 
 	private Belt belt;
 	private double beltFlow;
-	private ItemsFlow filter;
+	private ItemsStack filter;
 	
 	public BeltOption(Belt entity, String name, double flow) {
 		super(entity, name);
 		
 		this.belt = entity;
 		this.beltFlow = flow;
-		this.filter = new ItemsFlow(belt.getItem().name, beltFlow);
+		this.filter = new ItemsStack(belt.getItem().name(), beltFlow);
 	}
 
 	public enum BeltType {
@@ -23,7 +23,7 @@ public class BeltOption extends ConnectionOption {
 	}
 	
 	@Override
-	public ItemsFlow requestedInputLimited(ItemsFlow output) {
+	public ItemsStack requestedInputLimited(ItemsStack output) {
 		return output.throttle(filter);
 	}
 
@@ -39,33 +39,53 @@ public class BeltOption extends ConnectionOption {
 //		}
 //	}
 	@Override
-	public ItemsFlow availableOutputLimited(ItemsFlow output) {
+	public ItemsStack availableOutputLimited(ItemsStack output) {
 		return output.throttle(filter);
 	}
+
+    @Override
+    public double constructionCost() {
+        return beltFlow;
+    }
+
+    @Override
+    public double placementCost() {
+        return 1;
+    }
+
+    @Override
+    public double maxInput() {
+        return beltFlow;
+    }
+
+    @Override
+    public double maxOutput() {
+        return beltFlow;
+    }
 
 
 //	@Override
 //	public ItemsFlow outputFlow(ItemsFlow input) {
-//		Item item = belt.getItem();
+//		Item name = belt.getItem();
 //		
-//		double inputFlow = input.getDouble(item.name);
+//		double inputFlow = input.getDouble(name.name);
 //		double outputFlow = Math.min(inputFlow, beltFlow);
-//		return new ItemsFlow(item.name, outputFlow);
+//		return new ItemsFlow(name.name, outputFlow);
 //	}
 //
 //	@Override
 //	public ItemsFlow requestedInputLimited(ItemsFlow output) {
-//		Item item = belt.getItem();
+//		Item name = belt.getItem();
 //		
-//		double flow = Math.min(output.get(item.name).flow(), beltFlow);
-//		return new ItemsFlow(item.name, flow);
+//		double amount = Math.min(output.get(name.name).amount(), beltFlow);
+//		return new ItemsFlow(name.name, amount);
 //	}
 //
 //	@Override
 //	public ItemsFlow requestedInput() {
-//		Item item = belt.getItem();
+//		Item name = belt.getItem();
 //		
-//		return new ItemsFlow(item.name, beltFlow);
+//		return new ItemsFlow(name.name, beltFlow);
 //	}
 //
 //	@Override

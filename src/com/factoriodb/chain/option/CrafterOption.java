@@ -1,7 +1,6 @@
 package com.factoriodb.chain.option;
 
 import com.factoriodb.chain.Crafter;
-import com.factoriodb.model.ItemsFlow;
 
 public abstract class CrafterOption extends EntityOption {
 	private String optionDescription;
@@ -11,19 +10,23 @@ public abstract class CrafterOption extends EntityOption {
 		this.self = self;
 		this.optionDescription = optionDescription;
 	}
-	
+
+    @Override
+    public String name() {
+        return optionDescription;
+    }
 //	public abstract ItemsFlow outputFlow(ItemsFlow input);
 //
 //	public abstract ItemsFlow requestedInput();
 	
 //	@Override
-//	public List<Item> getAvailableItems() {
-//		return self.getAvailableItems();
+//	public List<Item> getOutputRatio() {
+//		return self.getOutputRatio();
 //	}
 //
 //	@Override
-//	public List<Item> getRequestedItems() {
-//		return self.getRequestedItems();
+//	public List<Item> getInputRatio() {
+//		return self.getInputRatio();
 //	}
 //
 //	@Override

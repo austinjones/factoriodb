@@ -1,17 +1,17 @@
 package com.factoriodb.recipe;
 
-import com.factoriodb.model.Item;
+import com.factoriodb.com.factoriodb.input.InputItem;
 
 public class ItemStack {
-	private Item item;
+	private InputItem item;
 	private int quantity;
 	
-	public ItemStack(Item item, int quantity) {
+	public ItemStack(InputItem item, int quantity) {
 		this.item = item;
 		this.quantity = quantity;
 	}
 
-	public Item getItem() {
+	public InputItem getItem() {
 		return item;
 	}
 

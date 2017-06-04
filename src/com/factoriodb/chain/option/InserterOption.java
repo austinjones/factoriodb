@@ -1,8 +1,7 @@
 package com.factoriodb.chain.option;
 
 import com.factoriodb.chain.Inserter;
-import com.factoriodb.model.ItemFlow;
-import com.factoriodb.model.ItemsFlow;
+import com.factoriodb.model.ItemsStack;
 
 public class InserterOption extends ConnectionOption {
 	
@@ -19,22 +18,47 @@ public class InserterOption extends ConnectionOption {
 	}
 
 	@Override
-	public ItemsFlow requestedInputLimited(ItemsFlow output) {
-		return output;
+	public ItemsStack requestedInputLimited(ItemsStack output) {
+        if (output.total() < speed * stackSize) {
+            return output;
+        }
+
+        double scale = (speed * stackSize) / output.total();
+		return ItemsStack.mul(output, scale);
 	}
 
 	@Override
-	public ItemsFlow availableOutputLimited(ItemsFlow output) {
+	public ItemsStack availableOutputLimited(ItemsStack output) {
 		double total = output.total();
 		double inserterFlow = speed * stackSize;
 		
 		if (total < inserterFlow) {
 			return output;
 		} else {
-			return ItemsFlow.mul(output, inserterFlow / total);
+			return ItemsStack.mul(output, inserterFlow / total);
 		}
 	}
-	
+
+    @Override
+    public double constructionCost() {
+        return speed * stackSize;
+    }
+
+    @Override
+    public double placementCost() {
+        return 1;
+    }
+
+    @Override
+    public double maxInput() {
+        return speed * stackSize;
+    }
+
+    @Override
+    public double maxOutput() {
+        return speed * stackSize;
+    }
+
 //	@Override
 //	public ItemsFlow outputFlow(ItemsFlow inputs) {
 //		ItemsFlow targetFlow = target.requestedInput();
@@ -44,8 +68,8 @@ public class InserterOption extends ConnectionOption {
 //		double inputUsage = 1;
 //		
 //		// balance available supply among itemflow targets
-//		for(ItemFlow i : inputs.flows()) {
-//			double irate = targetFlow.getDouble(i.item()) / i.flow();
+//		for(ItemFlow i : inputs.items()) {
+//			double irate = targetFlow.getDouble(i.name()) / i.amount();
 //			if(irate < inputUsage) {
 //				inputUsage = irate;
 //			}
@@ -54,10 +78,10 @@ public class InserterOption extends ConnectionOption {
 //		double insertionRate = Math.min(speed * stackSize, inputUsage * totalInputFlow);
 //		
 //		ItemsFlow outputRate = new ItemsFlow();
-//		for (ItemFlow i : targetFlow.flows()) {
-//			double itemProportion = i.flow() / totalTargetFlow;
+//		for (ItemFlow i : targetFlow.items()) {
+//			double itemProportion = i.amount() / totalTargetFlow;
 //			double itemRate = insertionRate * itemProportion;
-//			outputRate = ItemsFlow.add(outputRate, new ItemsFlow(i.item(), itemRate));
+//			outputRate = ItemsFlow.add(outputRate, new ItemsFlow(i.name(), itemRate));
 //		}
 //		
 //		return outputRate;

@@ -37,7 +37,7 @@ public class DataParser {
 	private static String MODE = "normal";
 	
 	public static void main(String[] args) throws IOException {
-		File itemFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/item/item.lua");
+		File itemFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/name/name.lua");
 		File moduleFile = new File("lua/module.lua");
 		File recipeFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/recipe/recipe.lua");
 		File fluidFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/fluid/fluid.lua");
@@ -45,12 +45,12 @@ public class DataParser {
 
 		File recipeFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/recipe/");
 		File fluidFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/fluid/");
-		File itemFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/item/");
+		File itemFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/name/");
 		
 		writeJsonFile(readLuaFile(testFile, "foo"), new File("json/test.json"));
 		writeJsonFile(readLuaDirectory(recipeFolder, "recipe"), new File("json/recipes.json"));
 		writeJsonFile(readLuaFile(moduleFile, "module"), new File("json/modules.json"));
-		writeJsonFile(readLuaDirectory(itemFolder, "item"), new File("json/items.json"));
+		writeJsonFile(readLuaDirectory(itemFolder, "name"), new File("json/items.json"));
 		writeJsonFile(readLuaDirectory(fluidFolder, "fluid"), new File("json/fluids.json"));
 	}
 	
@@ -76,25 +76,25 @@ public class DataParser {
 			JsonObject object = (JsonObject)element;
 			JsonElement type = object.get("type");
 			if (type != null && type.isJsonPrimitive()) {
-				if (typeFilter.equals("item") && "ammo".equals(type.getAsString())) {
+				if (typeFilter.equals("name") && "ammo".equals(type.getAsString())) {
 					object.remove("type");
-					object.addProperty("type", "item");
+					object.addProperty("type", "name");
 					type = object.get("type");
 				}
 			}
 			
 			if (type != null && type.isJsonPrimitive()) {
-				if (typeFilter.equals("item") && "capsule".equals(type.getAsString())) {
+				if (typeFilter.equals("name") && "capsule".equals(type.getAsString())) {
 					object.remove("type");
-					object.addProperty("type", "item");
+					object.addProperty("type", "name");
 					type = object.get("type");
 				}
 			}
 			
 			if (type != null && type.isJsonPrimitive()) {
-				if (typeFilter.equals("item") && "module".equals(type.getAsString())) {
+				if (typeFilter.equals("name") && "module".equals(type.getAsString())) {
 					object.remove("type");
-					object.addProperty("type", "item");
+					object.addProperty("type", "name");
 					type = object.get("type");
 				}
 			}
