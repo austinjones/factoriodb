@@ -16,6 +16,8 @@ import java.util.List;
  * @author austinjones
  */
 public class Pipe extends Connection {
+    // SPEED FORMULA: Tt = (50*(n-1) + 200) / (3*(n-1) + 2)
+    // Link: https://www.reddit.com/r/factorio/comments/6fsjew/pipe_throughput_equation_015/
     public static final double SPEED_YELLOW = 13.333;
     public static final double SPEED_RED = 26.666;
     public static final double SPEED_BLUE = 40.0;

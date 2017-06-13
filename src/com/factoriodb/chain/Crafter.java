@@ -56,8 +56,10 @@ public class Crafter extends Entity {
     }
 
     @Override
-    public ItemsStack getOutputRatio(ItemsStack inputRatio) {
-        double rate = getInputRatio().minratio(inputRatio);
+    public ItemsStack getOutputRatio(ItemsStack availableInput) {
+        ItemsStack entityInput = getInputRatio();
+        ItemsStack usableRequest = availableInput.filter(entityInput.itemNames());
+        double rate = usableRequest.minratio(entityInput);
         return ItemsStack.mul(getOutputRatio(), rate);
     }
 

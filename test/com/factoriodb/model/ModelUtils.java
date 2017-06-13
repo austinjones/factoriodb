@@ -52,7 +52,10 @@ public class ModelUtils {
         InputFluid badFluid = new InputFluid();
         badFluid.name = "bad-fluid";
 
-        InputFluid[] fluids = new InputFluid[] {rawFluid, spaceFluid, badFluid};
+        InputFluid okFluid = new InputFluid();
+        okFluid.name = "ok-fluid";
+
+        InputFluid[] fluids = new InputFluid[] {rawFluid, spaceFluid, badFluid, okFluid};
 
         InputRecipe refinery = new InputRecipe();
         refinery.name = "fluid-processing";
@@ -78,9 +81,18 @@ public class ModelUtils {
         cracking.category = "chemistry";
         cracking.ingredients.add(new InputRecipeItem("bad-fluid", 1));
 
-        cracking.result = "space-fluid";
+        cracking.result = "ok-fluid";
         cracking.result_count = 1;
         cracking.energy_required = 2;
+
+        InputRecipe cracking2 = new InputRecipe();
+        cracking2.name = "ok-fluid-cracking";
+        cracking2.category = "chemistry";
+        cracking2.ingredients.add(new InputRecipeItem("ok-fluid", 1));
+
+        cracking2.result = "space-fluid";
+        cracking2.result_count = 1;
+        cracking2.energy_required = 2;
 
         InputRecipe[] recipes = new InputRecipe[] {
                 smelting,

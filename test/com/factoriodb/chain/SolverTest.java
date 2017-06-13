@@ -17,6 +17,28 @@ import static org.junit.Assert.*;
  */
 public class SolverTest {
     @Test
+    public void testRatio() {
+        Model m = ModelUtils.getTestModel();
+        RecipeUtils ru = new RecipeUtils(m);
+
+        Pipe input = ru.pipe("raw-fluid");
+        input.markInput();
+
+        Crafter refinery = ru.craftRecipe("fluid-processing");
+        refinery.connectFrom(input);
+
+        Crafter cracking = ru.craftRecipe("bad-fluid-cracking");
+        cracking.connectFrom(refinery);
+
+        Solver solver = new Solver(m);
+        Solver.SolveNode node = solver.parse(cracking);
+        solver.solveRatio(node);
+
+        assertEquals(new ItemsStack("space-fluid", 2.0/3.0), node.adjustedOutput);
+
+        System.out.println(node);
+    }
+    @Test
     public void testTransitive() {
         Model m = ModelUtils.getTestModel();
         RecipeUtils ru = new RecipeUtils(m);
@@ -37,8 +59,8 @@ public class SolverTest {
         cracking.connectFrom(badFluid);
         spaceFluid.connectFrom(cracking);
 
-        Solver solver = new Solver(m, spaceFluid);
-        Solver.SolveNode node = solver.solveForOutput(spaceFluid, new ItemsStack("space-fluid", 4));
+        Solver solver = new Solver(m);
+        Solver.SolveNode node = solver.solveForOutput(spaceFluid, new ItemsStack("space-fluid", 120));
 
         Main.print(node, 0);
     }
@@ -56,7 +78,7 @@ public class SolverTest {
         Belt output = new Belt(m, "test-plate");
         output.insertFrom(a);
 
-        Solver solver = new Solver(m, output);
+        Solver solver = new Solver(m);
         Solver.SolveNode node = solver.solveForOutput(output, new ItemsStack("test-plate", 4));
 
         Main.print(node, 0);

@@ -78,7 +78,7 @@ public class Main {
         Pipe output = ru.pipe("petroleum-gas");
         output.connectFrom(refinery);
 
-        Solver solver = new Solver(m, output);
+        Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
         ItemsStack outputRate = new ItemsStack("petroleum-gas", 10);
         print(solver.solveForOutput(output, outputRate), 0);
@@ -103,18 +103,17 @@ public class Main {
 
         Crafter heavyCracking = ru.craftRecipe("heavy-oil-cracking");
         heavyCracking.connectFrom(heavy, water);
-        light.connectFrom(heavyCracking);
 
         Crafter lightCracking = ru.craftRecipe("light-oil-cracking");
-        lightCracking.connectFrom(light, water);
+        lightCracking.connectFrom(heavyCracking, light, water);
 
         Pipe petroleum = ru.pipe("petroleum-gas");
         petroleum.connectFrom(lightCracking);
         petroleum.connectFrom(refinery);
 
-        Solver solver = new Solver(m, petroleum);
+        Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
-        ItemsStack outputRate = new ItemsStack("petroleum-gas", 200);
+        ItemsStack outputRate = new ItemsStack("petroleum-gas", 100);
         print(solver.solveForOutput(petroleum, outputRate), 0);
     }
 
@@ -134,7 +133,7 @@ public class Main {
         Belt output = ru.belt("electronic-circuit");
         output.insertFrom(circuitAssembler);
 
-        Solver solver = new Solver(m, output);
+        Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
         ItemsStack outputRate = new ItemsStack("electronic-circuit", Belt.SPEED_YELLOW);
         print(solver.solveForOutput(output, outputRate), 0);
@@ -152,7 +151,7 @@ public class Main {
         Belt output = ru.belt("iron-plate");
         output.insertFrom(smelter);
 
-        Solver solver = new Solver(m, output);
+        Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
         ItemsStack outputRate = new ItemsStack("iron-plate", 12);
         print(solver.solveForOutput(output, outputRate), 0);
@@ -178,7 +177,7 @@ public class Main {
 		Belt output = ru.belt("science-pack-1");
 		output.insertFrom(science_pack);
 		
-		Solver solver = new Solver(m, output);
+		Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
 		ItemsStack outputRate = new ItemsStack("science-pack-1", 1);
 		
@@ -224,7 +223,7 @@ public class Main {
 		Belt output = ru.belt("science-pack-2");
 		output.insertFrom(science_pack);
 		
-		Solver solver = new Solver(m, output);
+		Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
 		ItemsStack outputRate = new ItemsStack("science-pack-2", 1);
 		
@@ -243,7 +242,7 @@ public class Main {
 		Belt output = ru.belt("iron-gear-wheel");
 		output.insertFrom(gears);
 		
-		Solver solver = new Solver(m, output);
+		Solver solver = new Solver(m);
 //		System.out.println(solver.solveForInput(output));
 		ItemsStack outputRate = new ItemsStack("iron-gear-wheel", 1);
 		print(solver.solveForOutput(output, outputRate), 0);
@@ -256,7 +255,7 @@ public class Main {
             if(option.unnecessary) {
                 continue;
             }
-			System.out.println(tabStr + option);
+			System.out.println(tabStr + option + " -- request " + node.request);
 		}
 		
 		for(SolveNode source : node.sources) {
