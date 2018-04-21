@@ -1,6 +1,6 @@
 package com.factoriodb.recipe;
 
-import com.factoriodb.com.factoriodb.input.InputItem;
+import com.factoriodb.input.InputItem;
 
 public class ItemStack {
 	private InputItem item;

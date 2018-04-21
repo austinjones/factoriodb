@@ -1,4 +1,4 @@
-package com.factoriodb.com.factoriodb.input;
+package com.factoriodb.input;
 
 public class InputRecipeItem {
 	public String name;

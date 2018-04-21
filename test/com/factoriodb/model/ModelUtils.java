@@ -1,11 +1,10 @@
 package com.factoriodb.model;
 
-import com.factoriodb.com.factoriodb.input.InputFluid;
-import com.factoriodb.com.factoriodb.input.InputItem;
-import com.factoriodb.com.factoriodb.input.InputModule;
-import com.factoriodb.com.factoriodb.input.InputReader;
-import com.factoriodb.com.factoriodb.input.InputRecipe;
-import com.factoriodb.com.factoriodb.input.InputRecipeItem;
+import com.factoriodb.input.InputFluid;
+import com.factoriodb.input.InputItem;
+import com.factoriodb.input.InputReader;
+import com.factoriodb.input.InputRecipe;
+import com.factoriodb.input.InputRecipeItem;
 
 import java.util.ArrayList;
 

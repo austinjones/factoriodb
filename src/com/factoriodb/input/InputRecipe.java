@@ -1,4 +1,4 @@
-package com.factoriodb.com.factoriodb.input;
+package com.factoriodb.input;
 
 import java.util.ArrayList;
 import java.util.List;

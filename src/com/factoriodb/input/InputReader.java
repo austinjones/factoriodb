@@ -1,4 +1,4 @@
-package com.factoriodb.com.factoriodb.input;
+package com.factoriodb.input;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

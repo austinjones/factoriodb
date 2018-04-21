@@ -1,33 +1,20 @@
 package com.factoriodb.chain;
 
-import org.jgrapht.EdgeFactory;
-import org.jgrapht.Graph;
-import org.jgrapht.WeightedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import com.factoriodb.graph.stream.BasicGraphStream;
+import com.factoriodb.graph.GraphUtils;
+import com.factoriodb.graph.Recipe;
+import com.factoriodb.graph.RecipeGraph;
+import com.factoriodb.graph.ResourceEdge;
+import com.factoriodb.graph.ResourceGraph;
+
 import org.jgrapht.traverse.BreadthFirstIterator;
-import org.jgrapht.traverse.DepthFirstIterator;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
 
 /**
  * @author austinjones
@@ -50,197 +37,88 @@ public class Experiment {
         }
     }
 
-    public static class ResourceGraph<T> extends DefaultDirectedWeightedGraph<T, ResourceEdge> {
-        public ResourceGraph() {
-            super(ResourceEdge.class);
-        }
+    @Test
+    public void testRecipeAssembly() {
+        Recipe finished = new Recipe();
+        finished.name = "finished";
+        finished.inputItems.put("intermediate", 1.0);
+        finished.outputItems.put("finished", 5.0);
 
-        /**
-         * Assigns a weight to an edge.
-         *
-         * @param e edge on which to set weight
-         * @param weight new weight for edge
-         * @see WeightedGraph#setEdgeWeight(Object, double)
-         */
-        public void setEdgeResource(ResourceEdge e, String item, double weight)
-        {
-            assert (e instanceof ResourceEdge) : e.getClass();
-            e.item = item;
-            this.setEdgeWeight(e, weight);
-        }
+        Recipe intermediate = new Recipe();
+        intermediate.name = "intermediate";
+        intermediate.inputItems.put("plate", 1.0);
+        intermediate.outputItems.put("intermediate", 2.0);
 
-        public void addResourceEdge(T source, T target, String item, double weight) {
-            ResourceEdge edge = this.addEdge(source, target);
-            setEdgeResource(edge, item, weight);
-        }
+        RecipeGraph recipeGraph = new RecipeGraph();
+        recipeGraph.addVertex(finished);
+        recipeGraph.addVertex(intermediate);
 
-        public Set<ResourceEdge> targetsOf(T vertex) {
-            Set<ResourceEdge> edges = new HashSet<>();
-            for(ResourceEdge e : this.edgesOf(vertex)) {
-                T source = this.getEdgeSource(e);
-                if (source == vertex) {
-                    edges.add(e);
-                }
-            }
+        RecipeGraph connected = GraphUtils.connectRecipes(recipeGraph);
+        connected = GraphUtils.insertInputs(connected);
+        connected = GraphUtils.insertOutputs(connected);
 
-            return edges;
-        }
 
-        public Collection<ResourceEdge> sourcesOf(T vertex) {
-            Set<ResourceEdge> edges = new HashSet<>();
-            for(ResourceEdge e : this.edgesOf(vertex)) {
-                T target = this.getEdgeTarget(e);
-                if (target == vertex) {
-                    edges.add(e);
-                }
-            }
+        Recipe root = connected.vertexSet().stream().filter(r -> r.name.equals("output-finished")).findFirst().get();
+        ResourceGraph connectedResources = GraphUtils.convert(connected);
+        ResourceGraph solved = GraphUtils.solveResourceFlow(connectedResources);
+        ResourceGraph solvedRatio = GraphUtils.solveResourceRatio(connectedResources, root);
 
-            return edges;
-        }
+        System.out.println("Raw: " + recipeGraph);
+        System.out.println("Connected: " + connected);
+        System.out.println("Resource ratio: " + connectedResources);
+        System.out.println("Solved: " + solved);
+        System.out.println("SolvedRatio: " + solvedRatio);
     }
 
-    public static class ResourceEdge extends DefaultWeightedEdge {
-        String item;
+    @Test
+    public void testRecipeAssemblyOil() {
+        Recipe oil = new Recipe();
+        oil.name = "oil";
+        oil.inputItems.put("water", 1.0);
+        oil.inputItems.put("oil", 1.0);
+        oil.outputItems.put("heavy", 1.0);
+        oil.outputItems.put("light", 2.0);
+        oil.outputItems.put("petroleum", 4.0);
 
-        public ResourceEdge() {
+        Recipe heavyCracking = new Recipe();
+        heavyCracking.name = "heavy-cracking";
+        heavyCracking.inputItems.put("heavy", 1.0);
+        heavyCracking.inputItems.put("water", 1.0);
+        heavyCracking.outputItems.put("light", 4.0);
 
-        }
+        Recipe lightCracking = new Recipe();
+        lightCracking.name = "light-cracking";
+        lightCracking.inputItems.put("light", 1.0);
+        lightCracking.inputItems.put("water", 1.0);
+        lightCracking.outputItems.put("petroleum", 2.0);
 
-        @Override
-        public int hashCode() {
-            return 13 * (item != null ? item.hashCode() : 0) + 7 * Double.hashCode(getWeight())
-                    + 5 * (getSource() != null ? getSource().hashCode() : 0)
-                    + 3 * (getTarget() != null ? getTarget().hashCode() : 0);
-        }
+        RecipeGraph recipeGraph = new RecipeGraph();
+        recipeGraph.addVertex(oil);
+        recipeGraph.addVertex(lightCracking);
+        recipeGraph.addVertex(heavyCracking);
 
-        @Override
-        public boolean equals(Object obj) {
-            if(obj == null) {
-                return false;
-            }
+        RecipeGraph connected = GraphUtils.connectRecipes(recipeGraph);
+        connected = GraphUtils.insertInputs(connected);
+        connected = GraphUtils.insertOutputs(connected);
+        ResourceGraph connectedResources = GraphUtils.convert(connected);
+        ResourceGraph solved = GraphUtils.solveResourceFlow(connectedResources);
 
-            if(!(obj instanceof ResourceEdge)) {
-                return false;
-            }
+        Recipe root = connected.vertexSet().stream().filter(r -> r.name.equals("output-petroleum")).findFirst().get();
+        Recipe input = connected.vertexSet().stream().filter(r -> r.name.equals("input-oil")).findFirst().get();
+        Recipe waterin = connected.vertexSet().stream().filter(r -> r.name.equals("input-water")).findFirst().get();
+        ResourceGraph solvedRatio = GraphUtils.solveResourceRatio(connectedResources, root);
+        ResourceGraph solvedOil = GraphUtils.solveResourceRatio(connectedResources, oil);
+        ResourceGraph solvedOilInput = GraphUtils.solveResourceRatio(connectedResources, input);
+        ResourceGraph solvedWaterInput = GraphUtils.solveResourceRatio(connectedResources, waterin);
 
-            ResourceEdge other = (ResourceEdge)obj;
-            if(other.item == null && this.item != null) {
-                return false;
-            }
-
-            return other.item.equals(this.item) && other.getWeight() == this.getWeight();
-        }
-
-        public String toString() {
-            return item + " x " + this.getWeight();
-        }
-    }
-
-    private static class StablizationException extends RuntimeException {
-        public StablizationException() {
-            super();
-        }
-
-        public StablizationException(String message) {
-            super(message);
-        }
-
-        public StablizationException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public StablizationException(Throwable cause) {
-            super(cause);
-        }
-
-        protected StablizationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-            super(message, cause, enableSuppression, writableStackTrace);
-        }
-    }
-
-    /**
-     * Warning: relies on correct implementations of Vertex and Edge equals and hashCode methods.
-     * @param from
-     * @param targetGenerator
-     * @param convertVertex
-     * @param convertEdge
-     * @param <V>
-     * @param <E>
-     * @param <G>
-     * @return
-     */
-    private <V,E,G extends Graph<V,E>> G mapUntilStable(G from,
-                                            Supplier<G> targetGenerator,
-                                            VertexConverter<G,V,V> convertVertex,
-                                            EdgeConverter<G,E,E> convertEdge) {
-        // the behavior of this function is a little scary.
-        // but I think it's worth it for the downstream code simplification
-        // the Graph.equals() method that is commonly used (AbstractGraph)
-        // relies on hashCode() and equals(Object) implementations of vertex/edge classes.
-        // if we can't stabilize the output within 10,000 iterations.  we abort with a RuntimeException.
-        int iteration = 0;
-
-        Graph<V,E> last = null;
-        G current = from;
-
-        System.out.println("Source: " + current);
-        while(last == null || !last.equals(current)) {
-            G to = targetGenerator.get();
-
-            Map<V,V> vertexMap = new HashMap<>();
-            for(V v1 : current.vertexSet()) {
-                V v2 = convertVertex.convert(current, v1);
-                vertexMap.put(v1, v2);
-                to.addVertex(v2);
-            }
-
-            for(E e1 : current.edgeSet()) {
-                V sourceV2 = vertexMap.get(current.getEdgeSource(e1));
-                V targetV2 = vertexMap.get(current.getEdgeTarget(e1));
-                E e2 = convertEdge.convert(current, e1);
-                boolean added = to.addEdge(sourceV2, targetV2, e2);
-                if(!added) {
-                    throw new IllegalStateException("Failed to add edge " + e2 + " from " + sourceV2+ " to " + targetV2);
-                }
-            }
-
-            last = current;
-            current = to;
-            iteration++;
-            System.out.println("Iteration " + iteration + ": " + current);
-            if(iteration > 10000) {
-                throw new StablizationException("Didn't stablize: " + current);
-            }
-        }
-
-        return current;
-    }
-
-    public interface VertexConverter<G, V1, V2> {
-        public V2 convert(G g, V1 v1);
-    }
-
-    public interface EdgeConverter<G, E1, E2> {
-        public E2 convert(G g, E1 e1);
-    }
-
-    private <V1,V2,E1,E2> Graph<V2,E2> map(Graph<V1,E1> from, Graph<V2,E2> to,
-                                   Function<V1,V2> convertVertex, Function<E1, E2> convertEdge) {
-        Map<V1, V2> vertexMap = new HashMap<>();
-        for(V1 v1 : from.vertexSet()) {
-            V2 v2 = convertVertex.apply(v1);
-            vertexMap.put(v1, v2);
-            to.addVertex(v2);
-        }
-
-        for(E1 e1 : from.edgeSet()) {
-            V2 sourceV2 = vertexMap.get(from.getEdgeSource(e1));
-            V2 targetV2 = vertexMap.get(from.getEdgeTarget(e1));
-            E2 e2 = convertEdge.apply(e1);
-            to.addEdge(sourceV2, targetV2, e2);
-        }
-
-        return to;
+        System.out.println("Raw: " + recipeGraph);
+        System.out.println("Connected: " + connected);
+        System.out.println("Resource ratio: " + connectedResources);
+        System.out.println("Solved: " + solved);
+        System.out.println("SolvedRatio: " + solvedRatio);
+        System.out.println("SolvedRatio oil: " + solvedOil);
+        System.out.println("SolvedRatio oilin: " + solvedOilInput);
+        System.out.println("SolvedRatio waterin: " + solvedWaterInput);
     }
 
     @Test
@@ -264,10 +142,10 @@ public class Experiment {
         g.addResourceEdge(c1, o1, "good", 1);
 
         ResourceGraph<Node<Double>> g2 = new ResourceGraph<Node<Double>>();
-        map(g, g2,
-                (v) -> {
+        new BasicGraphStream<>(g).map(g2,
+                (_g, v) -> {
                     Map<String, List<ResourceEdge>> items = g.sourcesOf(v).stream()
-                            .collect(Collectors.groupingBy((e) -> e.item));
+                            .collect(Collectors.groupingBy((e) -> e.getItem()));
 
                     OptionalDouble min = items.values().stream()
                             .map((l) -> l.stream()
@@ -278,28 +156,28 @@ public class Experiment {
 
                     return new Node<Double>(v, min.orElse(1.0));
                 },
-                (e) -> e
+                (_g, e) -> e
         );
 
         ResourceGraph<Node<Double>> g3 = new ResourceGraph<>();
-        map(g2, g3,
-                (v) -> v,
-                (e) ->  {
+        new BasicGraphStream<>(g2).map(g3,
+                (_g, v) -> v,
+                (_g, e) ->  {
                     ResourceEdge r = new ResourceEdge();
                     Node<Double> source = g2.getEdgeSource(e);
                     double factor = Math.min(source.value, 1);
                     double speed = g.getEdgeWeight(e) * factor;
 
-                    g3.setEdgeResource(r, e.item, speed);
+                    g3.setEdgeResource(r, e.getItem(), speed);
                     return r;
                 }
         );
 
         ResourceGraph<Node<Double>> g4 = new ResourceGraph<>();
-        map(g3, g4,
-                (v) -> {
+        new BasicGraphStream<>(g3).map(g4,
+                (_g, v) -> {
                     Map<String, List<ResourceEdge>> items = g3.sourcesOf(v).stream()
-                            .collect(Collectors.groupingBy((e) -> e.item));
+                            .collect(Collectors.groupingBy((e) -> e.getItem()));
 
                     OptionalDouble min = items.values().stream()
                             .map((l) -> l.stream()
@@ -310,7 +188,7 @@ public class Experiment {
 
                     return new Node<Double>(v.desc, min.orElse(1.0));
                 },
-                (e) -> e
+                (_g, e) -> e
         );
 //        BreadthFirstIterator<String, ResourceEdge> iter = new BreadthFirstIterator<>(g);
 //        while(iter.hasNext()) {
@@ -355,7 +233,7 @@ public class Experiment {
                 Collection<ResourceEdge> targets = graph.targetsOf(vertex);
 
                 Map<String, List<ResourceEdge>> items = sources.stream()
-                        .collect(Collectors.groupingBy((e) -> e.item));
+                        .collect(Collectors.groupingBy((e) -> e.getItem()));
 
                 double min = items.values().stream()
                         .map((l) -> l.stream()
@@ -375,65 +253,6 @@ public class Experiment {
                 }
             }
         }
-    }
-
-
-    private <T> double speed(ResourceGraph<T> graph, T vertex) {
-        Collection<ResourceEdge> sources = graph.sourcesOf(vertex);
-
-        Map<String, List<ResourceEdge>> items = sources.stream()
-                .collect(Collectors.groupingBy((e) -> e.item));
-
-        double min = items.values().stream()
-                .map((l) -> l.stream()
-                        .mapToDouble((e) -> graph.getEdgeWeight(e))
-                        .filter((e) -> e != Double.POSITIVE_INFINITY)
-                        .sum())
-                .filter((e) -> e != 0)
-                .mapToDouble((e) -> e)
-                .min().orElse(1.0);
-
-        return min;
-    }
-
-    private <T> ResourceGraph<T> solve2(ResourceGraph<T> graph) {
-        return mapUntilStable(graph, () -> new ResourceGraph<T>(),
-                (g, v) -> v,
-                (g, e) -> {
-                    T source = g.getEdgeSource(e);
-                    T target = g.getEdgeTarget(e);
-                    ResourceEdge originalEdge = graph.getEdge(source, target);
-                    double originalWeight = graph.getEdgeWeight(originalEdge);
-
-                    ResourceEdge edge = new ResourceEdge();
-
-                    String resource = e.item;
-                    double speed = speed(g, g.getEdgeSource(e));
-
-                    g.setEdgeResource(edge, resource, speed * originalWeight);
-
-                    return edge;
-                });
-    }
-
-    private <T> ResourceGraph<T> solve3(ResourceGraph<T> graph) {
-        return mapUntilStable(graph, () -> new ResourceGraph<T>(),
-                (g, v) -> v,
-                (g, e) -> {
-                    T source = g.getEdgeSource(e);
-                    T target = g.getEdgeTarget(e);
-                    ResourceEdge originalEdge = graph.getEdge(source, target);
-                    double originalWeight = graph.getEdgeWeight(originalEdge);
-
-                    ResourceEdge edge = new ResourceEdge();
-
-                    String resource = e.item;
-                    double speed = speed(g, g.getEdgeSource(e));
-
-                    g.setEdgeResource(edge, resource, speed * originalWeight);
-
-                    return edge;
-                });
     }
 
     @Test
@@ -460,86 +279,46 @@ public class Experiment {
 
         System.out.println(g);
 
-        ResourceGraph<String> solved = solve2(g);
+        ResourceGraph<String> solved = GraphUtils.solveResourceFlow(g);
         System.out.println( "solve2: " + solved);
 
         solve(g);
         System.out.println( "solve1: " + g);
     }
 
+    @Test
+    public void testReal1b() {
+        ResourceGraph<String> g = new ResourceGraph<>();
 
+        // take the input graph, and produce edges with the ratio of output items
+        // for tree graphs (output is terminal node), this will be 1 for each node.
+        // for non-tree graphs (like oil), this will be interesting.
+        String i1 = "i1";
+        String r1 = "r1";
+        String c1 = "c1";
+        String c2 = "c2";
+        String f1 = "f1";
+        String o1 = "o1";
 
-    private static class Recipe {
-        public String name;
-        public Map<String, Double> inputItems = new HashMap<>();
-        public Map<String, Double> outputItems = new HashMap<>();
-        public double time = 1;
+        g.addVertex(i1);
+        g.addVertex(r1);
+        g.addVertex(c1);
+        g.addVertex(c2);
+        g.addVertex(f1);
+        g.addVertex(o1);
 
-        public Recipe() {
+        g.addResourceEdge(i1, r1, "oil", 1);
+        g.addResourceEdge(r1, c1, "bad", 3);
+        g.addResourceEdge(r1, c2, "ok", 2);
+        g.addResourceEdge(r1, f1, "good", 1);
+        g.addResourceEdge(c1, c2, "ok", 0.5);
+        g.addResourceEdge(c2, f1, "good", 0.5);
+        g.addResourceEdge(f1, o1, "good", 15);
 
-        }
+        System.out.println(g);
 
-        public Recipe(String item) {
-            this.name = item;
-            inputItems.put(item, 1.0);
-            outputItems.put(item, 1.0);
-            this.time = 0;
-        }
-
-        public double inputRatio(String input, Recipe source) {
-            if(!inputItems.containsKey(input)) {
-                throw new IllegalArgumentException("Unknown input " + input + " for recipe " + name);
-            }
-
-            if(!source.outputItems.containsKey(input)) {
-                throw new IllegalArgumentException("Unknown input " + input + " for recipe " + name);
-            }
-
-            return source.outputRate(input) / this.inputRate(input);
-        }
-
-        public double ratio(String input, String output) {
-            if(!inputItems.containsKey(input)) {
-                throw new IllegalArgumentException("Unknown input " + input + " for recipe " + name);
-            }
-
-            if(!outputItems.containsKey(output)) {
-                throw new IllegalArgumentException("Unknown input " + output + " for recipe " + name);
-            }
-
-            return this.inputRate(input) / this.outputRate(output);
-        }
-
-        public double outputRatio(String output, Recipe target) {
-            if(!target.inputItems.containsKey(output)) {
-                throw new IllegalArgumentException("Unknown input " + output + " for recipe " + name);
-            }
-
-            if(!outputItems.containsKey(output)) {
-                throw new IllegalArgumentException("Unknown input " + output + " for recipe " + name);
-            }
-
-            return this.outputRate(output) / target.inputRate(output);
-        }
-
-        public double outputRate(String item) {
-            return 1.0 * outputItems.get(item) / time;
-        }
-
-        public double inputRate(String item) {
-            return 1.0 * inputItems.get(item) / time;
-        }
-
-        public double totalOutput() {
-            if(outputItems.isEmpty()) {
-                return 0;
-            }
-
-            return outputItems.values()
-                    .stream()
-                    .mapToDouble((d) -> d)
-                    .sum();
-        }
+        ResourceGraph<String> solved = GraphUtils.solveResourceFlow(g);
+        System.out.println( "solve2: " + solved);
     }
 
     @Test
@@ -593,16 +372,57 @@ public class Experiment {
         g.addResourceEdge(water, cl, "water", Double.POSITIVE_INFINITY);
         g.addResourceEdge(water, ch, "water", Double.POSITIVE_INFINITY);
 
-        // TODO: how do we output 2 when there is more output than input?
         g.addResourceEdge(ch, cl, "light", heavyCracking.outputRatio("light", lightCracking));
         g.addResourceEdge(cl, o1, "petroleum", lightCracking.outputRate("petroleum"));
 
         System.out.println(g);
-        System.out.println(solve3(g));
+        System.out.println(GraphUtils.solveResourceFlow(g));
+    }
+
+    @Test
+    public void testRecipe2() {
+        Recipe finished = new Recipe();
+        finished.name = "finished";
+        finished.inputItems.put("intermediate", 1.0);
+
+        finished.outputItems.put("finished", 5.0);
+
+        Recipe intermediate = new Recipe();
+        intermediate.name = "intermediate";
+        intermediate.inputItems.put("plate", 1.25);
+
+        intermediate.outputItems.put("intermediate", 2.0);
+
+        Recipe smelting = new Recipe();
+        smelting.name = "intermediate";
+        smelting.inputItems.put("raw", 1.25);
+        smelting.inputItems.put("fuel", 0.75);
+
+        smelting.outputItems.put("plate", 2.0);
+
+        ResourceGraph<String> g = new ResourceGraph<>();
+
+        String raw = "raw";
+        String s = "s";
+        String i = "i";
+        String f = "f";
+
+        g.addVertex(raw);
+        g.addVertex(s);
+        g.addVertex(f);
+        g.addVertex(i);
+
+        g.addResourceEdge(raw, s, "raw", Double.POSITIVE_INFINITY);
+        g.addResourceEdge(raw, s, "fuel", Double.POSITIVE_INFINITY);
+
+        g.addResourceEdge(s, i, "plate", smelting.outputRatio("plate", intermediate));
+        g.addResourceEdge(i, f, "intermediate", intermediate.outputRatio("intermediate", finished));
+
+        System.out.println(g);
+        System.out.println(GraphUtils.solveResourceFlow(g));
 
 
     }
-
     @Test
     public void testReal2() {
         ResourceGraph<String> g = new ResourceGraph<>();
@@ -649,11 +469,11 @@ public class Experiment {
         g.addResourceEdge(ch, cl, "light", 1);
         g.addResourceEdge(cl, o1, "pet", 1);
 
-        System.out.println(solve2(g));
+        System.out.println(GraphUtils.solveResourceFlow(g));
 
-        System.out.println(g);
-        solve(g);
-        System.out.println(g);
+//        System.out.println(g);
+//        solve(g);
+//        System.out.println(g);
     }
 
 //    @Test

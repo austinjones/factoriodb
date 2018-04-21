@@ -5,7 +5,7 @@ import com.factoriodb.Solver.SolveOption;
 import com.factoriodb.chain.Belt;
 import com.factoriodb.chain.Crafter;
 import com.factoriodb.chain.Pipe;
-import com.factoriodb.com.factoriodb.input.InputReader;
+import com.factoriodb.input.InputReader;
 import com.factoriodb.model.ItemsStack;
 import com.factoriodb.model.Model;
 import com.factoriodb.recipe.RecipeUtils;

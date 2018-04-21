@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.factoriodb.chain.Crafter;
 import com.factoriodb.chain.Pipe;
+import com.factoriodb.graph.RecipeGraph;
 import com.factoriodb.model.Item;
 import com.factoriodb.model.Model;
 import com.factoriodb.chain.assembler.Assembler;
@@ -56,7 +57,7 @@ public class RecipeUtils {
 
     public Pipe pipe(String fluidName) {
         Item item = m.getItemByName(fluidName);
-        if(item == null) {
+        if (item == null) {
             throw new NullPointerException("Unknown name " + fluidName);
         }
         return new Pipe(item);

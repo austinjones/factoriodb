@@ -5,11 +5,9 @@ import com.factoriodb.model.ItemsStack;
 import com.factoriodb.model.Model;
 import com.factoriodb.chain.option.ConnectionOption;
 import com.factoriodb.chain.option.PipeOption;
-import com.factoriodb.com.factoriodb.input.InputFluid;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
