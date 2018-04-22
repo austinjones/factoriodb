@@ -1,5 +1,6 @@
 package com.factoriodb.chain;
 
+import com.factoriodb.graph.GraphSolver;
 import com.factoriodb.graph.stream.BasicGraphStream;
 import com.factoriodb.graph.GraphUtils;
 import com.factoriodb.graph.Recipe;
@@ -377,6 +378,34 @@ public class Experiment {
 
         System.out.println(g);
         System.out.println(GraphUtils.solveResourceFlow(g));
+    }
+
+    @Test
+    public void testFull() {
+        Recipe finished = new Recipe();
+        finished.name = "finished";
+        finished.inputItems.put("intermediate", 1.0);
+        finished.outputItems.put("finished", 2.0);
+
+        Recipe intermediate = new Recipe();
+        intermediate.name = "intermediate";
+        intermediate.inputItems.put("plate", 1.0);
+        intermediate.outputItems.put("intermediate", 4.0);
+
+        Recipe smelting = new Recipe();
+        smelting.name = "plate";
+        smelting.inputItems.put("raw", 1.0);
+        smelting.inputItems.put("fuel", 1.0);
+
+        smelting.outputItems.put("plate", 1.0);
+        GraphSolver solver = new GraphSolver();
+
+        ResourceGraph<Recipe> graph = solver.calculateRatio(smelting, intermediate, finished);
+        graph = solver.calculateFlow(graph);
+
+        Recipe first = graph.vertexSet().stream().filter((v) -> v.name.equals("output-finished")).findFirst().get();
+        solver.scaleToFlow(graph, first, 64);
+        System.out.println(graph);
     }
 
     @Test

@@ -64,7 +64,13 @@ public class ResourceGraph<T> extends DirectedWeightedMultigraph<T, ResourceEdge
     }
 
     public void scaleEdge(ResourceEdge edge, double factor) {
+        this.setEdgeWeight(edge, this.getEdgeWeight(edge) * factor);
+    }
 
+    public <T> void rescale(double factor) {
+        for (ResourceEdge edge : this.edgeSet()) {
+            this.scaleEdge(edge, factor);
+        }
     }
 
     public Map<String, Double> inputsOf(T vertex) {
