@@ -8,7 +8,26 @@ public class GraphSolver {
 
     }
 
-    public ResourceGraph<Recipe> calculateRatio(Recipe... recipes) {
+    public TransportGraph solve(Recipe... recipes) {
+        return solve(null, 0.0, recipes);
+    }
+
+    public TransportGraph solve(String recipe, double flow, Recipe... recipes) {
+        ResourceGraph ratios = calculateRatio(recipes);
+        ResourceGraph flows = calculateFlow(ratios);
+
+        if (recipe != null) {
+            for (ResourceVertex v : flows.vertexSet()) {
+                if (recipe.equals(v.getRecipe().getRecipe().name)) {
+                    scaleToFlow(flows, v, flow);
+                }
+            }
+        }
+
+        return GraphUtils.calculateTransportOptions(flows);
+    }
+
+    public ResourceGraph calculateRatio(Recipe... recipes) {
         RecipeGraph recipeGraph = new RecipeGraph();
         for (Recipe r : recipes) {
             recipeGraph.addVertex(r);
@@ -20,11 +39,11 @@ public class GraphSolver {
         return GraphUtils.convert(connected);
     }
 
-    public <T> ResourceGraph<T> calculateFlow(ResourceGraph<T> graph) {
+    public ResourceGraph calculateFlow(ResourceGraph graph) {
         return GraphUtils.solveResourceFlow(graph);
     }
 
-    public <T> void scaleToFlow(ResourceGraph<T> graph, T vertex, double flow) {
+    public void scaleToFlow(ResourceGraph graph, ResourceVertex vertex, double flow) {
         double inflow = graph.sourcesOf(vertex).stream()
                 .mapToDouble((e) -> graph.getEdgeWeight(e))
                 .sum();

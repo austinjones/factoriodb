@@ -1,21 +1,12 @@
 package com.factoriodb.model;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import com.factoriodb.graph.Recipe;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class Model {
 	public Set<String> itemNames = new TreeSet<>();
@@ -42,7 +33,7 @@ public class Model {
         }
 
         for(Recipe recipe : recipes) {
-            recipeNames.add(recipe.name());
+            recipeNames.add(recipe.name);
         }
 //        for (Item item : inputItems) {
 //            itemNames.add(item.name());

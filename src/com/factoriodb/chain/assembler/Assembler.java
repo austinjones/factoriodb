@@ -1,9 +1,9 @@
 package com.factoriodb.chain.assembler;
 
-import com.factoriodb.chain.Crafter;
-import com.factoriodb.chain.option.CrafterOption;
+import com.factoriodb.chain.option.RecipeOption;
+import com.factoriodb.graph.RatedRecipe;
+import com.factoriodb.graph.Recipe;
 import com.factoriodb.model.CrafterType;
-import com.factoriodb.model.Recipe;
 
 import java.util.Collection;
 
@@ -16,14 +16,16 @@ public interface Assembler {
             case CHEMICAL_PLANT: return new ChemicalPlantAssembler();
             case SMELTER: return new SmelterAssembler();
             case OIL_REFINERY: return new OilRefineryAssembler();
+            case INPUT: return new IdentityAssembler();
+            case OUTPUT: return new IdentityAssembler();
         }
 
         throw new IllegalArgumentException("Unsupported craftItem type: " + type);
     }
 
     public static Assembler getInstance(Recipe r) {
-        return getInstance(r.getCrafterType());
+        return getInstance(r.crafterType);
     }
 
-    public Collection<? extends CrafterOption> options(Crafter crafter);
+    public Collection<? extends RecipeOption> options(RatedRecipe recipe);
 }

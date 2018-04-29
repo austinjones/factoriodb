@@ -1,8 +1,9 @@
 package com.factoriodb.chain.assembler;
 
-import com.factoriodb.chain.Crafter;
 import com.factoriodb.chain.option.AssemblerOption;
-import com.factoriodb.chain.option.CrafterOption;
+import com.factoriodb.chain.option.RecipeOption;
+import com.factoriodb.graph.RatedRecipe;
+import com.factoriodb.graph.Recipe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,9 +14,9 @@ import java.util.List;
  */
 public class CentrifugeAssembler implements Assembler {
     @Override
-    public Collection<? extends CrafterOption> options(Crafter crafter) {
+    public Collection<? extends RecipeOption> options(RatedRecipe recipe) {
         List<AssemblerOption> options = new ArrayList<>();
-        options.add(new AssemblerOption(crafter, "centrifuge", 0.75));
+        options.add(new AssemblerOption(recipe, "centrifuge", 0.75));
         return options;
     }
 }

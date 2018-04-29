@@ -6,96 +6,39 @@ import com.factoriodb.model.ItemsStack;
 public class BeltOption extends ConnectionOption {
 	private static double MAX_FLOW = 13.33;
 
-	private Belt belt;
 	private double beltFlow;
-	private ItemsStack filter;
+	private double rate;
+	private double count;
 	
-	public BeltOption(Belt entity, String name, double flow) {
-		super(entity, name);
-		
-		this.belt = entity;
+	public BeltOption(String name, double flow, double rate) {
+        super(name);
 		this.beltFlow = flow;
-		this.filter = new ItemsStack(belt.getItem().name(), beltFlow);
-	}
-
-	public enum BeltType {
-		
-	}
-	
-	@Override
-	public ItemsStack requestedInputLimited(ItemsStack output) {
-		return output.throttle(filter);
-	}
-
-//	@Override
-//	public ItemsFlow availableOutputLimited(ItemsFlow output) {
-//		double total = output.total();
-//		
-//		if (total < beltFlow) {
-//			return output.throttle(filter);
-//		} else {
-//			return ItemsFlow.mul(output, beltFlow / total)
-//						.throttle(filter);
-//		}
-//	}
-	@Override
-	public ItemsStack availableOutputLimited(ItemsStack output) {
-		return output.throttle(filter);
+		this.rate = rate;
+		this.count = rate / flow;
 	}
 
     @Override
-    public double constructionCost() {
-        return beltFlow;
+    public double count() {
+        return count;
     }
 
     @Override
-    public double placementCost() {
-        return 1;
+    public double input() {
+        return rate;
+    }
+
+    @Override
+    public double output() {
+        return rate;
     }
 
     @Override
     public double maxInput() {
-        return beltFlow;
+        return Math.ceil(count) * beltFlow;
     }
 
     @Override
     public double maxOutput() {
-        return beltFlow;
+        return Math.ceil(count) * beltFlow;
     }
-
-
-//	@Override
-//	public ItemsFlow outputFlow(ItemsFlow input) {
-//		Item name = belt.getItem();
-//		
-//		double inputFlow = input.getDouble(name.name);
-//		double outputFlow = Math.min(inputFlow, beltFlow);
-//		return new ItemsFlow(name.name, outputFlow);
-//	}
-//
-//	@Override
-//	public ItemsFlow requestedInputLimited(ItemsFlow output) {
-//		Item name = belt.getItem();
-//		
-//		double amount = Math.min(output.get(name.name).amount(), beltFlow);
-//		return new ItemsFlow(name.name, amount);
-//	}
-//
-//	@Override
-//	public ItemsFlow requestedInput() {
-//		Item name = belt.getItem();
-//		
-//		return new ItemsFlow(name.name, beltFlow);
-//	}
-//
-//	@Override
-//	public ItemsFlow availableOutputLimited(ItemsFlow output) {
-//		double total = output.total();
-//		
-//		if (total < beltFlow) {
-//			return output;
-//		} else {
-//			return ItemsFlow.mul(output, beltFlow / total);
-//		}
-//	}
 }

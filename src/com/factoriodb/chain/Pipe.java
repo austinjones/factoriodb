@@ -20,37 +20,23 @@ public class Pipe extends Connection {
     public static final double SPEED_RED = 26.666;
     public static final double SPEED_BLUE = 40.0;
 
-    private Item fluid;
-    public Pipe(Item item) {
+    private String fluid;
+    public Pipe(String item) {
         this.fluid = item;
     }
 
-    public Pipe(Model m, String fluidName) {
-        this(m.getItemByName(fluidName));
-    }
+//    public Pipe(Model m, String fluidName) {
+//        this(m.getItemByName(fluidName));
+//    }
 
-    public Item getFluid() {
+    public String getFluid() {
         return fluid;
     }
 
     @Override
-    public ItemsStack getOutputRatio() {
-        return new ItemsStack(fluid.name(), 1);
-    }
-
-    @Override
-    public ItemsStack getOutputRatio(ItemsStack inputRatio) {
-        return inputRatio;
-    }
-
-    @Override
-    public ItemsStack getInputRatio() {
-        return new ItemsStack(fluid.name(), 1);
-    }
-    @Override
-    public Collection<? extends ConnectionOption> options() {
+    public Collection<? extends ConnectionOption> options(double rate) {
         List<PipeOption> options = new ArrayList<>();
-        options.add(new PipeOption(this, "pipe"));
+        options.add(new PipeOption("pipe", fluid, rate));
         return options;
     }
 

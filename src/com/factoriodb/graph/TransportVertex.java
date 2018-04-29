@@ -1,20 +1,41 @@
 package com.factoriodb.graph;
 
+import com.factoriodb.chain.OptionFactory;
+import com.factoriodb.chain.assembler.Assembler;
+import com.factoriodb.chain.option.RecipeOption;
+
+import java.util.Collection;
+
 /**
  * @author austinjones
  */
 public class TransportVertex {
-    private Recipe recipe;
+    private ResourceVertex vertex;
+    private Collection<? extends RecipeOption> solutions;
 
-    public TransportVertex(Recipe vertex) {
-        this.recipe = vertex;
+    public TransportVertex(ResourceVertex vertex) {
+        this.vertex = vertex;
     }
 
-    public Recipe getRecipe() {
-        return recipe;
+    public RatedRecipe getRecipe() {
+        return vertex.getRecipe();
     }
 
-    public List<VertexSolution> calculateSolutions() {
+    public double rate() {
+        return vertex.getRate();
+    }
 
+    public Collection<? extends RecipeOption> getSolutions() {
+        return solutions;
+    }
+
+    public TransportVertex updateSolutions(TransportGraph g) {
+        solutions = OptionFactory.recipeOptions(getRecipe());
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return vertex.toString();
     }
 }

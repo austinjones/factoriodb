@@ -1,5 +1,7 @@
 package com.factoriodb.graph;
 
+import com.factoriodb.model.CrafterType;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +14,7 @@ public class Recipe {
     public Map<String, Double> inputItems = new HashMap<>();
     public Map<String, Double> outputItems = new HashMap<>();
     public double time = 1;
-    public String type = "craft";
+    public CrafterType crafterType = CrafterType.ASSEMBLER;
 
     public Recipe() {
 
@@ -23,6 +25,14 @@ public class Recipe {
         inputItems.put(item, 1.0);
         outputItems.put(item, 1.0);
         this.time = 0;
+    }
+
+    public RatedRecipe withRate(double rate) {
+        return new RatedRecipe(this, rate);
+    }
+
+    public RatedRecipe withOutputRate(String item, double itemRate) {
+        return null;
     }
 
     public double inputRatio(String input, Recipe source) {
@@ -62,11 +72,11 @@ public class Recipe {
     }
 
     public double outputRate(String item) {
-        return 1.0 * outputItems.get(item) / time;
+        return 1.0 * outputItems.getOrDefault(item, 0.0) / time;
     }
 
     public double inputRate(String item) {
-        return 1.0 * inputItems.get(item) / time;
+        return 1.0 * inputItems.getOrDefault(item, 0.0) / time;
     }
 
     public double totalOutput() {

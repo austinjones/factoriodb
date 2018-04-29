@@ -1,5 +1,7 @@
 package com.factoriodb.model;
 
+import com.factoriodb.graph.Recipe;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,7 +22,7 @@ public class Recipes implements Iterable<Recipe> {
         this.recipes = new ArrayList<>(recipes);
         this.map = recipes.stream().collect(
                 Collectors.toMap(
-                        (e) -> e.name(),
+                        (e) -> e.name,
                         (e) -> e
                 )
         );
@@ -28,13 +30,13 @@ public class Recipes implements Iterable<Recipe> {
         for (Recipe r : recipes) {
             this.recipes.add(r);
 
-            for(ItemStack item : r.getOutput().items()) {
+            for(String item : r.outputs()) {
 //                itemNames.add(item.name());
 
-                List<Recipe> rlist = mapByResult.get(item.name());
+                List<Recipe> rlist = mapByResult.get(item);
                 if(rlist == null) {
                     rlist = new ArrayList<>();
-                    mapByResult.put(item.name(), rlist);
+                    mapByResult.put(item, rlist);
                 }
                 rlist.add(r);
             }

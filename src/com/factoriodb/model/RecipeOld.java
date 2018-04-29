@@ -3,15 +3,16 @@ package com.factoriodb.model;
 /**
  * @author austinjones
  */
-public class Recipe {
+@Deprecated
+public class RecipeOld {
     private String name;
     private ItemsStack input;
     private ItemsStack output;
     private double energyRequired;
     private CrafterType crafterType;
 
-    public Recipe(String name, ItemsStack input, ItemsStack output,
-                  double energyRequired, CrafterType type) {
+    public RecipeOld(String name, ItemsStack input, ItemsStack output,
+                     double energyRequired, CrafterType type) {
         this.name = name;
         this.input = input;
         this.output = output;

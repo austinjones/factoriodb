@@ -11,45 +11,29 @@ import com.factoriodb.model.Model;
 import com.factoriodb.chain.option.BeltOption;
 import com.factoriodb.chain.option.ConnectionOption;
 
-public class Belt extends Connection {
+public class Belt {
     public static final double SPEED_YELLOW = 13.333;
     public static final double SPEED_RED = 26.666;
     public static final double SPEED_BLUE = 40.0;
 
-	private Item item;
-	public Belt(Item item) {
+	private String item;
+	public Belt(String item) {
 		this.item = item;
 	}
 
-    public Belt(Model m, String itemName) {
-        this(m.getItemByName(itemName));
-    }
+//    public Belt(Model m, String itemName) {
+//        this(m.getItemByName(itemName));
+//    }
 
-    public Item getItem() {
+    public String getItem() {
 		return item;
 	}
 
-	@Override
-	public ItemsStack getOutputRatio() {
-		return new ItemsStack(item.name(), 1);
-	}
-
-    @Override
-    public ItemsStack getOutputRatio(ItemsStack inputRatio) {
-        return inputRatio;
-    }
-
-    @Override
-	public ItemsStack getInputRatio() {
-        return new ItemsStack(item.name(), 1);
-	}
-
-	@Override
-	public Collection<? extends ConnectionOption> options() {
+	public Collection<? extends ConnectionOption> options(double rate) {
 		List<BeltOption> options = new ArrayList<>();
-		options.add(new BeltOption(this, "transport-belt-1", SPEED_YELLOW));
-		options.add(new BeltOption(this, "transport-belt-2", SPEED_RED));
-		options.add(new BeltOption(this, "transport-belt-3", SPEED_BLUE));
+		options.add(new BeltOption("transport-belt-1", SPEED_YELLOW, rate));
+		options.add(new BeltOption("transport-belt-2", SPEED_RED, rate));
+		options.add(new BeltOption("transport-belt-3", SPEED_BLUE, rate));
 		return options;
 	}
 	

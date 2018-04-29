@@ -3,13 +3,14 @@ package com.factoriodb.input;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import com.factoriodb.graph.Recipe;
+import com.factoriodb.graph.ResourceEdge;
 import com.factoriodb.model.CrafterType;
 import com.factoriodb.model.Item;
 import com.factoriodb.model.ItemType;
 import com.factoriodb.model.Items;
 import com.factoriodb.model.ItemsStack;
 import com.factoriodb.model.Model;
-import com.factoriodb.model.Recipe;
 import com.factoriodb.model.Recipes;
 
 import java.io.File;
@@ -19,7 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Reads the input data, and isolates the Model class from the input data format.
@@ -103,31 +107,39 @@ public class InputReader {
     }
 
 
-    private static ItemsStack getStack(Items items, Collection<InputRecipeItem> input) {
-        ItemsStack result = new ItemsStack();
-
-        for(InputRecipeItem ri : input) {
-            Item i = items.get(ri.name);
-            if(i == null) {
-                throw new NullPointerException("Missing item " + ri.name);
-            }
-            result = ItemsStack.add(result, new ItemsStack(i.name(), ri.amount));
+    private static Map<String, Double> getStack(Collection<InputRecipeItem> input) {
+        if (input == null) {
+            return new HashMap<>();
         }
 
-        return result;
+        Map<String, List<InputRecipeItem>> items = input.stream()
+                .collect(Collectors.groupingBy((e) -> e.name));
+
+        return items.entrySet().stream().collect(Collectors.toMap(
+                e -> e.getKey(),
+                e -> e.getValue().stream().mapToDouble(i -> i.amount).sum()
+        ));
     }
 
     public static Recipes renderRecipes(Items items, InputRecipe[] inputRecipes) {
         List<Recipe> recipes = new ArrayList<>();
         for (InputRecipe r : inputRecipes) {
-            ItemsStack input = getStack(items, r.ingredients);
-            ItemsStack output = getStack(items, r.results);
+            Map<String, Double> input = getStack(r.ingredients);
+            Map<String, Double> output = getStack(r.results);
+
             if(r.result != null) {
-                output = ItemsStack.add(output, new ItemsStack(r.result, r.result_count));
+                double val = output.getOrDefault(r.result, 0.0);
+                val += r.result_count;
+                output.put(r.result, val);
             }
 
-            CrafterType type = CrafterType.fromInput(r.category);
-            Recipe recipe = new Recipe(r.name, input, output, r.energy_required, type);
+            Recipe recipe = new Recipe();
+            recipe.name = r.name;
+            recipe.inputItems = input;
+            recipe.outputItems = output;
+            recipe.crafterType = CrafterType.fromInput(r.category);
+            recipe.time = r.energy_required;
+
             recipes.add(recipe);
         }
 

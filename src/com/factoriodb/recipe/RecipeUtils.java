@@ -2,14 +2,13 @@ package com.factoriodb.recipe;
 
 import java.util.List;
 
-import com.factoriodb.chain.Crafter;
 import com.factoriodb.chain.Pipe;
-import com.factoriodb.graph.RecipeGraph;
+import com.factoriodb.graph.Recipe;
+import com.factoriodb.model.CrafterType;
 import com.factoriodb.model.Item;
 import com.factoriodb.model.Model;
-import com.factoriodb.chain.assembler.Assembler;
 import com.factoriodb.chain.Belt;
-import com.factoriodb.model.Recipe;
+import com.factoriodb.model.RecipeOld;
 
 public class RecipeUtils {
 	private Model m;
@@ -30,51 +29,32 @@ public class RecipeUtils {
         return rs.get(0);
     }
 
-    public Item item(String item) {
-        Item i = m.getItemByName(item);
-        if(i == null) {
-            throw new NullPointerException("Unknown name " + item);
+    public Recipe namedRecipe(String recipe) {
+        Recipe r = m.getRecipes().get(recipe);
+        if(r == null) {
+            throw new NullPointerException("Unknown recipe " + recipe);
         }
 
-        return i;
+        return r;
     }
 
-	public Crafter craftItem(String item) {
-        return new Crafter(recipe(item));
+    public Recipe output(String item, double rate) {
+	    Recipe r = new Recipe();
+	    r.crafterType = CrafterType.OUTPUT;
+	    r.name = "output-item";
+	    r.time = 1;
+	    r.outputItems.put(item, rate);
+
+	    return r;
     }
 
-    public Crafter craftRecipe(String recipe) {
-        return new Crafter(m.getRecipes().get(recipe));
+    public Recipe input(String item, double rate) {
+        Recipe r = new Recipe();
+        r.crafterType = CrafterType.INPUT;
+        r.name = "input-item";
+        r.time = 1;
+        r.outputItems.put(item, rate);
+
+        return r;
     }
-
-	public Belt belt(String itemName) {
-		Item item = m.getItemByName(itemName);
-		if(item == null) {
-			throw new NullPointerException("Unknown name " + itemName);
-		}
-		return new Belt(item);
-	}
-
-    public Pipe pipe(String fluidName) {
-        Item item = m.getItemByName(fluidName);
-        if (item == null) {
-            throw new NullPointerException("Unknown name " + fluidName);
-        }
-        return new Pipe(item);
-    }
-
-
-//	public SplitBelt splitbelt(String left, String right) {
-//		Item l = m.getItemByName(left);
-//		if(l == null) {
-//			throw new NullPointerException("Unknown name " + left);
-//		}
-//		
-//		Item r = m.getItemByName(right);
-//		if(r == null) {
-//			throw new NullPointerException("Unknown name " + right);
-//		}
-//		
-//		return new SplitBelt(l, r);
-//	}
 }

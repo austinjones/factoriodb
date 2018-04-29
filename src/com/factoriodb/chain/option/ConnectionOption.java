@@ -5,10 +5,8 @@ import com.factoriodb.model.ItemsStack;
 
 public abstract class ConnectionOption extends EntityOption {
 	private String optionDescription;
-	private Connection self;
 	
-	public ConnectionOption(Connection self, String optionDescription) {
-		this.self = self;
+	public ConnectionOption(String optionDescription) {
 		this.optionDescription = optionDescription;
 	}
 
@@ -17,12 +15,13 @@ public abstract class ConnectionOption extends EntityOption {
         return optionDescription;
     }
 
-	@Override
-	public ItemsStack availableOutputLimited(ItemsStack requestedOutput, ItemsStack input) {
-		ItemsStack best = availableOutputLimited(requestedOutput);
-		return best.throttle(input);
-	}
-	
+    public abstract double count();
+
+    public abstract double input();
+    public abstract double output();
+
+    public abstract double maxInput();
+    public abstract double maxOutput();
 //	@Override
 //	public List<Item> getOutputRatio() {
 //		return self.getOutputRatio();
@@ -39,11 +38,6 @@ public abstract class ConnectionOption extends EntityOption {
 //	}
 	
 	public String toString() {
-		return optionDescription;
-	}
-	
-	@Override
-	public boolean isConnection() {
-		return true;
-	}
+        return optionDescription;
+    }
 }

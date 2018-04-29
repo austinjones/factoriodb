@@ -35,7 +35,10 @@ public class DataParser {
 
 	// modes: normal | expensive
 	private static String MODE = "normal";
-	
+
+	// TODO: grab data from Git:
+    // https://github.com/wube/factorio-data/tree/master/base/prototypes/recipe
+
 	public static void main(String[] args) throws IOException {
 		File itemFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/name/name.lua");
 		File moduleFile = new File("lua/module.lua");

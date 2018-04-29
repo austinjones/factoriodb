@@ -10,7 +10,9 @@ public enum CrafterType {
     CHEMICAL_PLANT,
     OIL_REFINERY,
     ROCKET_LAUNCH_SITE,
-    CENTRIFUGE;
+    CENTRIFUGE,
+    INPUT,
+    OUTPUT;
 
     public static CrafterType fromInput(String input) {
         if(input == null || input.isEmpty()) {
@@ -26,6 +28,8 @@ public enum CrafterType {
             case "smelting": return SMELTER;
             case "rocket-building": return ROCKET_LAUNCH_SITE;
             case "centrifuging": return CENTRIFUGE;
+            case "input": return INPUT;
+            case "output": return OUTPUT;
         }
 
         throw new UnsupportedOperationException(input);

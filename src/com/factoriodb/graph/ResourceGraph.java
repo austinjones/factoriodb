@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * @author austinjones
  */
-public class ResourceGraph<T> extends DirectedWeightedMultigraph<T, ResourceEdge> {
+public class ResourceGraph extends DirectedWeightedMultigraph<ResourceVertex, ResourceEdge> {
     public ResourceGraph() {
         super(ResourceEdge.class);
     }
@@ -30,15 +30,15 @@ public class ResourceGraph<T> extends DirectedWeightedMultigraph<T, ResourceEdge
         this.setEdgeWeight(e, weight);
     }
 
-    public void addResourceEdge(T source, T target, String item, double weight) {
+    public void addResourceEdge(ResourceVertex source, ResourceVertex target, String item, double weight) {
         ResourceEdge edge = this.addEdge(source, target);
         setEdgeResource(edge, item, weight);
     }
 
-    public Set<ResourceEdge> targetsOf(T vertex) {
+    public Set<ResourceEdge> targetsOf(ResourceVertex vertex) {
         Set<ResourceEdge> edges = new HashSet<>();
         for (ResourceEdge e : this.edgesOf(vertex)) {
-            T source = this.getEdgeSource(e);
+            ResourceVertex source = this.getEdgeSource(e);
             if (source != null && source.equals(vertex)) {
                 edges.add(e);
             }
@@ -47,10 +47,10 @@ public class ResourceGraph<T> extends DirectedWeightedMultigraph<T, ResourceEdge
         return edges;
     }
 
-    public Collection<ResourceEdge> sourcesOf(T vertex) {
+    public Collection<ResourceEdge> sourcesOf(ResourceVertex vertex) {
         Set<ResourceEdge> edges = new HashSet<>();
         for (ResourceEdge e : this.edgesOf(vertex)) {
-            T target = this.getEdgeTarget(e);
+            ResourceVertex target = this.getEdgeTarget(e);
             if (target != null && target.equals(vertex)) {
                 edges.add(e);
             }
@@ -59,8 +59,24 @@ public class ResourceGraph<T> extends DirectedWeightedMultigraph<T, ResourceEdge
         return edges;
     }
 
-    public void scaleVertex(T vertex, double factor) {
+    public double inputRate(ResourceVertex vertex, String item) {
+        return this.sourcesOf(vertex).stream()
+                .filter((e)->item.equals(e.getItem()))
+                .mapToDouble((e) -> this.getEdgeWeight(e))
+                .sum();
+    }
 
+    public double outputRate(ResourceVertex vertex, String item) {
+        return this.targetsOf(vertex).stream()
+                .filter((e)->item.equals(e.getItem()))
+                .mapToDouble((e) -> this.getEdgeWeight(e))
+                .sum();
+
+    }
+
+
+    public void scaleVertex(ResourceVertex vertex, double factor) {
+        vertex.setRate(vertex.getRate() * factor);
     }
 
     public void scaleEdge(ResourceEdge edge, double factor) {
@@ -71,14 +87,18 @@ public class ResourceGraph<T> extends DirectedWeightedMultigraph<T, ResourceEdge
         for (ResourceEdge edge : this.edgeSet()) {
             this.scaleEdge(edge, factor);
         }
+
+        for (ResourceVertex vertex : this.vertexSet()) {
+            this.scaleVertex(vertex, factor);
+        }
     }
 
-    public Map<String, Double> inputsOf(T vertex) {
+    public Map<String, Double> inputsOf(ResourceVertex vertex) {
         return this.sourcesOf(vertex).stream().collect(
                 Collectors.groupingBy(e->e.getItem(), Collectors.summingDouble(e->this.getEdgeWeight(e))));
     }
 
-    public Map<String, Double> outputsOf(T vertex) {
+    public Map<String, Double> outputsOf(ResourceVertex vertex) {
         return this.targetsOf(vertex).stream().collect(
                 Collectors.groupingBy(e->e.getItem(), Collectors.summingDouble(e->this.getEdgeWeight(e))));
     }
