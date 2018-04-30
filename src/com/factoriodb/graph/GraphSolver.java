@@ -1,5 +1,7 @@
 package com.factoriodb.graph;
 
+import org.apache.commons.math3.linear.SingularMatrixException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +44,12 @@ public class GraphSolver {
         connected = GraphUtils.insertInputs(connected);
         connected = GraphUtils.insertOutputs(connected);
 
-        ResourceGraph flows = GraphUtils.solveResourceFlow(connected, constraints);
-
-        return GraphUtils.calculateTransportOptions(flows);
+        try {
+            ResourceGraph flows = GraphUtils.solveResourceFlow(connected, constraints);
+            return GraphUtils.calculateTransportOptions(flows);
+        } catch( SingularMatrixException e) {
+            throw new UndefinedSolutionException("Failed to calculate resource flow", e);
+        }
     }
 
 //    public void scaleToFlow(ResourceGraph graph, ResourceVertex vertex, double flow) {

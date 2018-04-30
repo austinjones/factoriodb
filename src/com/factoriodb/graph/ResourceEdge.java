@@ -43,7 +43,10 @@ public class ResourceEdge extends DefaultWeightedEdge {
             return false;
         }
 
-        return other.item.equals(this.item) && other.getWeight() == this.getWeight();
+        return other.item.equals(this.item)
+                && other.getWeight() == this.getWeight()
+                && getSource().equals(other.getSource())
+                && getTarget().equals(other.getTarget());
     }
 
     public String toString() {

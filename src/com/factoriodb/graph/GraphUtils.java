@@ -43,45 +43,72 @@ public class GraphUtils {
         edges.addAll(graph.edgeSet());
 
         int width = edges.size() + recipes.size();
-        int height = 2 * edges.size() + constraints.size();
 
-        double[][] matrix = new double[height][width];
-        double[] rhs = new double[height];
+        List<double[]> matrix = new ArrayList<>();
+        List<Double> rhs = new ArrayList<>();
+
+        for (Recipe recipe : recipes) {
+            for (String item : recipe.inputItems.keySet()) {
+                double[] line = new double[width];
+
+                int r = recipes.indexOf(recipe);
+                line[edges.size() + r] = -1.0 * recipe.inputRate(item);
+
+                int edgesFound = 0;
+                for(RecipeEdge edge : graph.incomingEdgesOf(recipe)) {
+                    if (!item.equals(edge.getItem())) {
+                        continue;
+                    }
+
+                    int e = edges.indexOf(edge);
+                    line[e] = 1.0;
+
+                    edgesFound++;
+                }
+
+                if (edgesFound == 0) {
+                    continue;
+                }
+
+                matrix.add(line);
+                rhs.add(0.0);
+            }
+        }
 
         // need variables in solution for proportion of output in monosplit situation!
         // create a line per (vertex, item) pair
         // add 1.0 for all edges that consume or produce resource
         // add -1.0 for vertex input/output rate
-        for (int e = 0; e < edges.size(); e++) {
-            double[] line = matrix[e];
+        for (Recipe recipe : recipes) {
+            for (String item : recipe.outputItems.keySet()) {
+                double[] line = new double[width];
 
-            RecipeEdge edge = edges.get(e);
-            Recipe target = graph.getEdgeTarget(edge);
+                int r = recipes.indexOf(recipe);
+                line[edges.size() + r] = -1.0 * recipe.outputRate(item);
 
-            int targetIndex = recipes.indexOf(target);
+                int edgesFound = 0;
+                for(RecipeEdge edge : graph.outgoingEdgesOf(recipe)) {
+                    if (!item.equals(edge.getItem())) {
+                        continue;
+                    }
 
-            line[e] = 1.0;
-            line[edges.size() + targetIndex] = -1.0 * target.inputRate(edge.getItem());
+                    int e = edges.indexOf(edge);
+                    line[e] = 1.0;
 
-            rhs[e] = 0.0;
-        }
+                    edgesFound++;
+                }
 
-        for (int e = 0; e < edges.size(); e++) {
-            double[] line = matrix[edges.size() + e];
+                if (edgesFound == 0) {
+                    continue;
+                }
 
-            RecipeEdge edge = edges.get(e);
-            Recipe source = graph.getEdgeSource(edge);
-
-            int sourceIndex = recipes.indexOf(source);
-
-            line[e] = 1.0;
-            line[edges.size() + sourceIndex] = -1.0 * source.outputRate(edge.getItem());
-
-            rhs[e] = 0.0;
+                matrix.add(line);
+                rhs.add(0.0);
+            }
         }
 
         for (int c = 0; c < constraints.size(); c++) {
-            double[] line = matrix[2 * edges.size() + c];
+            double[] line = new double[width];
             GraphSolver.Constraint constraint = constraints.get(c);
 
             Recipe r = graph.getRecipe(constraint.recipe);
@@ -101,13 +128,21 @@ public class GraphUtils {
             int recipeIndex = recipes.indexOf(r);
             double rate = constraint.flow / r.inputRate(item);
             line[edges.size() + recipeIndex] = 1.0;
-            rhs[2 * edges.size() + c] = rate;
+
+            matrix.add(line);
+            rhs.add(rate);
         }
 
-        RealMatrix coefficients = new Array2DRowRealMatrix(matrix, false);
+        double[][] matrixArray = matrix.toArray(new double[0][0]);
+        double[] rhsArray = new double[matrixArray.length];
+        for (int i = 0; i < rhs.size(); i++) {
+            rhsArray[i] = rhs.get(i);
+        }
+
+        RealMatrix coefficients = new Array2DRowRealMatrix(matrixArray, false);
 
         DecompositionSolver solver = new QRDecomposition(coefficients).getSolver();
-        RealVector constants = new ArrayRealVector(rhs, false);
+        RealVector constants = new ArrayRealVector(rhsArray, false);
         RealVector solution = solver.solve(constants);
         System.out.println(solution);
 

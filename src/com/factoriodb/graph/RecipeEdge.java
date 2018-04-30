@@ -42,7 +42,9 @@ public class RecipeEdge extends DefaultEdge {
             return false;
         }
 
-        return other.item.equals(this.item);
+        return other.item.equals(this.item)
+                && getSource().equals(other.getSource())
+                && getTarget().equals(other.getTarget());
     }
 
     public String toString() {
