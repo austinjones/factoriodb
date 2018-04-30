@@ -61,12 +61,12 @@ public class Experiment {
 
         Recipe root = connected.vertexSet().stream().filter(r -> r.name.equals("output-finished")).findFirst().get();
         ResourceGraph connectedResources = GraphUtils.convert(connected);
-        ResourceGraph solved = GraphUtils.solveResourceFlow(connectedResources);
+//        ResourceGraph solved = GraphUtils.solveResourceFlow(connectedResources);
 
         System.out.println("Raw: " + recipeGraph);
         System.out.println("Connected: " + connected);
         System.out.println("Resource ratio: " + connectedResources);
-        System.out.println("Solved: " + solved);
+//        System.out.println("Solved: " + solved);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class Experiment {
         connected = GraphUtils.insertInputs(connected);
         connected = GraphUtils.insertOutputs(connected);
         ResourceGraph connectedResources = GraphUtils.convert(connected);
-        ResourceGraph solved = GraphUtils.solveResourceFlow(connectedResources);
+//        ResourceGraph solved = GraphUtils.solveResourceFlow(connectedResources);
 
         Recipe root = connected.vertexSet().stream().filter(r -> r.name.equals("output-petroleum")).findFirst().get();
         Recipe input = connected.vertexSet().stream().filter(r -> r.name.equals("input-oil")).findFirst().get();
@@ -108,7 +108,7 @@ public class Experiment {
         System.out.println("Raw: " + recipeGraph);
         System.out.println("Connected: " + connected);
         System.out.println("Resource ratio: " + connectedResources);
-        System.out.println("Solved: " + solved);
+//        System.out.println("Solved: " + solved);
     }
 
 //    @Test

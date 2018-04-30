@@ -95,7 +95,7 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve("output-electronic-circuit", 1,
+        TransportGraph graph = solver.bind("output-electronic-circuit", 1).solve(
                 ru.recipe("copper-cable"),
                 ru.recipe("electronic-circuit"));
 
@@ -137,7 +137,7 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve("output-iron-gear-wheel", 1, ru.recipe("iron-gear-wheel"));
+        TransportGraph graph = solver.bind("output-iron-gear-wheel", 1).solve(ru.recipe("iron-gear-wheel"));
 
         print(graph);
 	}

@@ -69,4 +69,14 @@ public class RecipeGraph extends DefaultDirectedGraph<Recipe, RecipeEdge> {
 
         return recipes;
     }
+
+    public Recipe getRecipe(String recipe) {
+        for (Recipe r : this.vertexSet()) {
+            if (recipe.equals(r.name)) {
+                return r;
+            }
+        }
+
+        return null;
+    }
 }

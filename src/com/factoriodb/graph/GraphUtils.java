@@ -3,6 +3,15 @@ package com.factoriodb.graph;
 import com.factoriodb.graph.stream.BasicGraphStream;
 import com.factoriodb.model.CrafterType;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.CholeskyDecomposition;
+import org.apache.commons.math3.linear.DecompositionSolver;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.QRDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.EdgeReversedGraph;
@@ -25,144 +34,93 @@ import javax.annotation.Resource;
  * @author austinjones
  */
 public class GraphUtils {
+    public static ResourceGraph solveResourceFlow(final RecipeGraph graph, List<GraphSolver.Constraint> constraints) {
+        // create equations for each recipe
+        ArrayList<Recipe> recipes = new ArrayList<>();
+        recipes.addAll(graph.vertexSet());
 
-    /**
-     * Calculates the crafting speed (1.0 being natural speed) given inputs of 'available output / requested input'
-     * @param graph a resource graph
-     * @param vertex the resource vertex in the graph
-     * @return a double crafting speed.
-     */
-    public static double sourceSpeed(ResourceGraph graph, ResourceVertex vertex) {
-        Collection<ResourceEdge> sources = graph.sourcesOf(vertex);
+        ArrayList<RecipeEdge> edges = new ArrayList<>();
+        edges.addAll(graph.edgeSet());
 
-        Map<String, List<ResourceEdge>> items = sources.stream()
-                .collect(Collectors.groupingBy((e) -> e.getItem()));
+        int width = edges.size() + recipes.size();
+        int height = 2 * edges.size() + constraints.size();
 
-        double min = items.values().stream()
-                .map((l) -> l.stream()
-                        .mapToDouble((e) -> graph.getEdgeWeight(e))
-                        .filter((e) -> e != Double.POSITIVE_INFINITY)
-                        .sum())
-                .filter((e) -> e != 0)
-                .mapToDouble((e) -> e)
-                .min().orElse(1.0);
+        double[][] matrix = new double[height][width];
+        double[] rhs = new double[height];
 
-        return min;
-    }
+        // need variables in solution for proportion of output in monosplit situation!
+        // create a line per (vertex, item) pair
+        // add 1.0 for all edges that consume or produce resource
+        // add -1.0 for vertex input/output rate
+        for (int e = 0; e < edges.size(); e++) {
+            double[] line = matrix[e];
 
-    public static double targetSpeed(ResourceGraph graph, ResourceVertex vertex) {
-        Collection<ResourceEdge> targets = graph.targetsOf(vertex);
+            RecipeEdge edge = edges.get(e);
+            Recipe target = graph.getEdgeTarget(edge);
 
-        Map<String, List<ResourceEdge>> items = targets.stream()
-                .collect(Collectors.groupingBy((e) -> e.getItem()));
+            int targetIndex = recipes.indexOf(target);
 
-        List<Double> mins = items.values().stream()
-                .map((l) -> l.stream()
-                        .mapToDouble((e) -> 1.0 / graph.getEdgeWeight(e))
-                        .sum())
-                .collect(Collectors.toList());
+            line[e] = 1.0;
+            line[edges.size() + targetIndex] = -1.0 * target.inputRate(edge.getItem());
 
-        double min = mins.stream()
-                .mapToDouble((e) -> e)
-                .filter(e -> e < 1.0)
-                .max().orElse(1.0);
-
-        return min;
-    }
-
-    public static void respeed(ResourceGraph graph, ResourceVertex v, double rate) {
-        double oldRate = v.getRate();
-        double rateFactor = rate / oldRate;
-
-        v.setRate(rate);
-        for (ResourceEdge e : graph.sourcesOf(v)) {
-            double edgeWeight = graph.getEdgeWeight(e);
-            graph.setEdgeWeight(e, edgeWeight / rateFactor);
+            rhs[e] = 0.0;
         }
 
-        for (ResourceEdge e : graph.targetsOf(v)) {
-            double edgeWeight = graph.getEdgeWeight(e);
-            graph.setEdgeWeight(e, edgeWeight * rateFactor);
-        }
-    }
+        for (int e = 0; e < edges.size(); e++) {
+            double[] line = matrix[edges.size() + e];
 
-    public static ResourceGraph solveResourceFlow(final ResourceGraph graph) {
-        // this produces vertices with a rate relative to natural craft speed
-        // and edges with a value relative to requested input / available input,
-        // but scaled by the transitive craft speed
+            RecipeEdge edge = edges.get(e);
+            Recipe source = graph.getEdgeSource(edge);
 
-        // REFACTOR AS:
+            int sourceIndex = recipes.indexOf(source);
 
-        // start from inputs, (Breadth first traversal), and increase speed as much as possible
-        for (TopologicalOrderIterator<ResourceVertex, ResourceEdge> it
-             = new TopologicalOrderIterator<>(graph); it.hasNext(); ) {
-            ResourceVertex v = it.next();
+            line[e] = 1.0;
+            line[edges.size() + sourceIndex] = -1.0 * source.outputRate(edge.getItem());
 
-            double rate = sourceSpeed(graph, v);
-            respeed(graph, v, v.getRate() * rate);
+            rhs[e] = 0.0;
         }
 
-        // start from outputs, (Reverse breadth first), and decrease 'overspeed sources' to match slowest input
-//        for (TopologicalOrderIterator<ResourceVertex, ResourceEdge> it
-//             = new TopologicalOrderIterator<>(new EdgeReversedGraph(graph)); it.hasNext(); ) {
-//            ResourceVertex v = it.next();
-//
-//            double rate = targetSpeed(graph, v);
-////            respeed(graph, v, v.getRate() / rate);
-//        }
+        for (int c = 0; c < constraints.size(); c++) {
+            double[] line = matrix[2 * edges.size() + c];
+            GraphSolver.Constraint constraint = constraints.get(c);
 
-//        ResourceGraph stable = new BasicGraphStream<>(graph).mapUntilStable(() -> new ResourceGraph(),
-//                (g, v) -> { v.setRate(speed(g, v)); return v; },
-//                (g, e) -> {
-//                    ResourceVertex source = g.getEdgeSource(e);
-//                    ResourceVertex target = g.getEdgeTarget(e);
-//                    ResourceEdge originalEdge = graph.getEdge(source, target);
-//                    double originalWeight = graph.getEdgeWeight(originalEdge);
-//
-//                    ResourceEdge edge = new ResourceEdge();
-//
-//                    String resource = e.getItem();
-//                    double speed = speed(g, g.getEdgeSource(e));
-//
-//                    double newWeight = speed * originalWeight;
-//                    g.setEdgeResource(edge, resource, newWeight);
-//
-//                    return edge;
-//                });
+            Recipe r = graph.getRecipe(constraint.recipe);
+            if (r == null) {
+                throw new NullPointerException("Unknown recipe from constraint " + constraint.recipe);
+            }
 
-        // now that the relative edges have stabilized,
-        // we convert the edges into absolute craft speed
-        // this is the true item flow
-        return new BasicGraphStream<>(graph).map(new ResourceGraph(),
-                (g, v) -> v,
-                (g, e) -> {
-                    ResourceVertex source = g.getEdgeSource(e);
+            String item = constraint.item;
+            if (item == null && r.inputItems.size() == 1) {
+                item = r.inputItems.keySet().iterator().next();
+            }
 
-                    String resource = e.getItem();
-                    double newWeight = source.getRecipe().outputRate(resource);
-                    g.setEdgeResource(e, resource, newWeight);
+            if (!r.inputItems.containsKey(item)) {
+                throw new NullPointerException("Unknown item from constraint on recipe " + constraint.recipe);
+            }
 
-                    return e;
-                });
-//
-//        return new BasicGraphStream<>(stable).map(
-//                new ResourceGraph<>(),
-//                (g, v) -> v,
-//                (g, e) -> {
-//                    if(g.getEdgeWeight(e) != Double.POSITIVE_INFINITY) {
-//                        return e;
-//                    } else {
-//                        String resource = e.getItem();
-//
-//                        ResourceEdge edge = new ResourceEdge();
-//                        double speed = speed(g, g.getEdgeTarget(e));
-//
-//                        g.setEdgeResource(edge, resource, speed);
-//
-//                        return edge;
-//                    }
-//                }
-//        );
+            int recipeIndex = recipes.indexOf(r);
+            double rate = constraint.flow / r.inputRate(item);
+            line[edges.size() + recipeIndex] = 1.0;
+            rhs[2 * edges.size() + c] = rate;
+        }
+
+        RealMatrix coefficients = new Array2DRowRealMatrix(matrix, false);
+
+        DecompositionSolver solver = new QRDecomposition(coefficients).getSolver();
+        RealVector constants = new ArrayRealVector(rhs, false);
+        RealVector solution = solver.solve(constants);
+        System.out.println(solution);
+
+        ResourceGraph rg = new BasicGraphStream<>(graph).map(new ResourceGraph(),
+            (g, v) -> new ResourceVertex(v, solution.getEntry(edges.size() + recipes.indexOf(v))),
+            (g, e) -> {
+                ResourceEdge edge = new ResourceEdge();
+                g.setEdgeResource(edge, e.getItem(), solution.getEntry(edges.indexOf(e)));
+                return edge;
+            }
+        );
+
+        return rg;
     }
 
 

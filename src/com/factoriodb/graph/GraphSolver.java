@@ -1,33 +1,38 @@
 package com.factoriodb.graph;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author austinjones
  */
 public class GraphSolver {
+    public static class Constraint {
+        String recipe;
+        String item;
+        double flow;
+    }
+
+    private List<Constraint> constraints = new ArrayList<>();
     public GraphSolver() {
 
     }
 
+    public GraphSolver bind(String recipe, double flow) {
+        return bind(recipe, null, flow);
+    }
+
+    public GraphSolver bind(String recipe, String item, double flow) {
+        Constraint c = new Constraint();
+        c.recipe = recipe;
+        c.item = item;
+        c.flow = flow;
+
+        constraints.add(c);
+        return this;
+    }
+
     public TransportGraph solve(Recipe... recipes) {
-        return solve(null, 0.0, recipes);
-    }
-
-    public TransportGraph solve(String recipe, double flow, Recipe... recipes) {
-        ResourceGraph ratios = calculateRatio(recipes);
-        ResourceGraph flows = calculateFlow(ratios);
-
-        if (recipe != null) {
-            for (ResourceVertex v : flows.vertexSet()) {
-                if (recipe.equals(v.getRecipe().getRecipe().name)) {
-                    scaleToFlow(flows, v, flow);
-                }
-            }
-        }
-
-        return GraphUtils.calculateTransportOptions(flows);
-    }
-
-    public ResourceGraph calculateRatio(Recipe... recipes) {
         RecipeGraph recipeGraph = new RecipeGraph();
         for (Recipe r : recipes) {
             recipeGraph.addVertex(r);
@@ -36,20 +41,19 @@ public class GraphSolver {
         RecipeGraph connected = GraphUtils.connectRecipes(recipeGraph);
         connected = GraphUtils.insertInputs(connected);
         connected = GraphUtils.insertOutputs(connected);
-        return GraphUtils.convert(connected);
+
+        ResourceGraph flows = GraphUtils.solveResourceFlow(connected, constraints);
+
+        return GraphUtils.calculateTransportOptions(flows);
     }
 
-    public ResourceGraph calculateFlow(ResourceGraph graph) {
-        return GraphUtils.solveResourceFlow(graph);
-    }
-
-    public void scaleToFlow(ResourceGraph graph, ResourceVertex vertex, double flow) {
-        double inflow = graph.sourcesOf(vertex).stream()
-                .mapToDouble((e) -> graph.getEdgeWeight(e))
-                .sum();
-
-        double scale = flow / inflow;
-        graph.rescale(scale);
-    }
+//    public void scaleToFlow(ResourceGraph graph, ResourceVertex vertex, double flow) {
+//        double inflow = graph.sourcesOf(vertex).stream()
+//                .mapToDouble((e) -> graph.getEdgeWeight(e))
+//                .sum();
+//
+//        double scale = flow / inflow;
+//        graph.rescale(scale);
+//    }
 
 }

@@ -17,6 +17,7 @@ import static org.junit.Assert.fail;
  * @author austinjones
  */
 public class GraphSolverTest {
+    private static double DELTA = 0.00001;
     private void assertValid(TransportGraph graph) {
         for (TransportVertex vertex : graph.vertexSet()) {
             if (vertex.getRecipe().getRecipe().crafterType != CrafterType.INPUT) {
@@ -43,7 +44,7 @@ public class GraphSolverTest {
             double actual = r.inputRate(item);
             assertEquals("Vertex " + vertex.toString() + " input " + item
                             + " should match sum of edge weights",
-                    expected, actual, 0.0000000000001);
+                    expected, actual, DELTA);
         }
     }
 
@@ -56,7 +57,7 @@ public class GraphSolverTest {
             double expected = weights.get(item);
             double actual = r.outputRate(item);
             assertEquals("Vertex " + vertex.toString() + " output should match sum of edge weights",
-                    expected, actual, 0.0000000000001);
+                    expected, actual, DELTA);
         }
     }
 
@@ -77,7 +78,7 @@ public class GraphSolverTest {
         gear.outputItems.put("iron-gear-wheel", 1.0);
         gear.time = 0.5;
 
-        TransportGraph graph = solver.solve("output-iron-gear-wheel", 10, gear);
+        TransportGraph graph = solver.bind("output-iron-gear-wheel", 10).solve(gear);
         Main.print(graph);
 //        assertValid(graph);
 
@@ -88,19 +89,65 @@ public class GraphSolverTest {
         TransportEdge plateEdge = graph.getEdge(input, gearSolution);
         TransportEdge gearEdge = graph.getEdge(gearSolution, output);
 
-        assertEquals(20.0, input.rate(), 0.0);
-        assertEquals(20.0, input.getRecipe().outputRate("iron-plate"), 0.0);
+        assertEquals(20.0, input.rate(), DELTA);
+        assertEquals(20.0, input.getRecipe().outputRate("iron-plate"), DELTA);
 
-        assertEquals(20.0, graph.getEdgeWeight(plateEdge), 0.0);
+        assertEquals(20.0, graph.getEdgeWeight(plateEdge), DELTA);
 
-        assertEquals(20.0, gearSolution.getRecipe().inputRate("iron-plate"), 0.0);
-        assertEquals(5.0, gearSolution.rate(), 0.0);
-        assertEquals(10.0, gearSolution.getRecipe().outputRate("iron-gear-wheel"), 0.0);
+        assertEquals(20.0, gearSolution.getRecipe().inputRate("iron-plate"), DELTA);
+        assertEquals(5.0, gearSolution.rate(), DELTA);
+        assertEquals(10.0, gearSolution.getRecipe().outputRate("iron-gear-wheel"), DELTA);
 
-        assertEquals(10.0, graph.getEdgeWeight(gearEdge), 0.0);
+        assertEquals(10.0, graph.getEdgeWeight(gearEdge), DELTA);
 
-        assertEquals(10.0, output.rate(), 0.0);
-        assertEquals(10.0, output.getRecipe().inputRate("iron-gear-wheel"), 0.0);
+        assertEquals(10.0, output.rate(), DELTA);
+        assertEquals(10.0, output.getRecipe().inputRate("iron-gear-wheel"), DELTA);
+    }
+
+    @Test
+    public void testSimple2() {
+        GraphSolver solver = new GraphSolver();
+
+        Recipe gear = new Recipe();
+        gear.name = "iron-gear-wheel";
+        gear.inputItems.put("iron-plate", 2.0);
+        gear.outputItems.put("iron-gear-wheel", 1.0);
+        gear.time = 0.5;
+
+        Recipe fin = new Recipe();
+        fin.name = "item-fin";
+        fin.inputItems.put("iron-gear-wheel", 1.0);
+        fin.outputItems.put("item-fin", 1.0);
+        fin.time = 0.5;
+
+        TransportGraph graph = solver.bind("output-item-fin", 10).solve(gear, fin);
+        Main.print(graph);
+//        assertValid(graph);
+
+        TransportVertex input = graph.getVertex("input-iron-plate");
+        TransportVertex gearSolution = graph.getVertex(gear);
+        TransportVertex finSolution = graph.getVertex("item-fin");
+        TransportVertex output = graph.getVertex("output-item-fin");
+
+        TransportEdge plateEdge = graph.getEdge(input, gearSolution);
+        TransportEdge gearEdge = graph.getEdge(gearSolution, finSolution);
+        TransportEdge finEdge = graph.getEdge(finSolution, output);
+
+        assertEquals(20.0, input.rate(), DELTA);
+        assertEquals(20.0, input.getRecipe().outputRate("iron-plate"), DELTA);
+
+        assertEquals(20.0, graph.getEdgeWeight(plateEdge), DELTA);
+
+        assertEquals(20.0, gearSolution.getRecipe().inputRate("iron-plate"), DELTA);
+        assertEquals(5.0, gearSolution.rate(), DELTA);
+        assertEquals(10.0, gearSolution.getRecipe().outputRate("iron-gear-wheel"), DELTA);
+
+        assertEquals(10.0, graph.getEdgeWeight(gearEdge), DELTA);
+        assertEquals(5.0, finSolution.rate(), DELTA);
+        assertEquals(10.0, graph.getEdgeWeight(finEdge), DELTA);
+
+        assertEquals(10.0, output.rate(), DELTA);
+        assertEquals(10.0, output.getRecipe().inputRate("item-fin"), DELTA);
     }
 
     @Test
@@ -126,44 +173,45 @@ public class GraphSolverTest {
         bar.outputItems.put("item-bar", 1.0);
         bar.time = 1;
 
-        TransportGraph graph = solver.solve("output-item-foo", 1.0, smelting, foo, bar);
+        TransportGraph graph = solver.bind("output-item-foo", 1.0)
+                .solve(smelting, foo, bar);
         Main.print(graph);
 //        assertValid(graph);
 
         TransportVertex ironIn = graph.getVertex("input-iron-ore");
-        assertEquals(2.0, ironIn.rate(), 0.0);
+        assertEquals(2.0, ironIn.rate(), DELTA);
 
         TransportVertex smeltSolution = graph.getVertex(smelting);
-        assertEquals(1.0, smeltSolution.rate(), 0.0);
+        assertEquals(1.0, smeltSolution.rate(), DELTA);
 
         TransportVertex fooSolution = graph.getVertex(foo);
-        assertEquals(1.0, fooSolution.rate(), 0.0);
+        assertEquals(1.0, fooSolution.rate(), DELTA);
 
         TransportVertex barSolution = graph.getVertex(bar);
-        assertEquals(1.0, barSolution.rate(), 0.0);
+        assertEquals(1.0, barSolution.rate(), DELTA);
 
         TransportVertex fooOut = graph.getVertex("output-item-foo");
-        assertEquals(1.0, fooOut.rate(), 0.0);
+        assertEquals(1.0, fooOut.rate(), DELTA);
 
         TransportVertex barOut = graph.getVertex("output-item-bar");
-        assertEquals(1.0, barOut.rate(), 0.0);
+        assertEquals(1.0, barOut.rate(), DELTA);
 
 
         TransportEdge oreEdge = graph.getEdge(ironIn, smeltSolution);
-        assertEquals(2.0, graph.getEdgeWeight(oreEdge), 0.0);
+        assertEquals(2.0, graph.getEdgeWeight(oreEdge), DELTA);
 
         TransportEdge plateFooEdge = graph.getEdge(smeltSolution, fooSolution);
-        assertEquals(1.0, graph.getEdgeWeight(plateFooEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(plateFooEdge), DELTA);
 
         TransportEdge plateBarEdge = graph.getEdge(smeltSolution, barSolution);
-        assertEquals(1.0, graph.getEdgeWeight(plateBarEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(plateBarEdge), DELTA);
 
 
         TransportEdge fooOutEdge = graph.getEdge(fooSolution, fooOut);
-        assertEquals(1.0, graph.getEdgeWeight(fooOutEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(fooOutEdge), DELTA);
 
         TransportEdge barOutEdge = graph.getEdge(barSolution, barOut);
-        assertEquals(1.0, graph.getEdgeWeight(barOutEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(barOutEdge), DELTA);
     }
 
     @Test
@@ -189,21 +237,22 @@ public class GraphSolverTest {
         combine.outputItems.put("item-fin", 1.0);
         combine.time = 1;
 
-        TransportGraph graph = solver.solve("output-item-fin", 1.0, gear, wire, combine);
+        TransportGraph graph = solver.bind("output-item-fin", 1.0)
+                .solve(gear, wire, combine);
         Main.print(graph);
 //        assertValid(graph);
 
         TransportVertex ironIn = graph.getVertex("input-iron-plate");
-        assertEquals(2.0, ironIn.rate(), 0.0);
+        assertEquals(2.0, ironIn.rate(), DELTA);
 
         TransportVertex gearSolution = graph.getVertex(gear);
         TransportVertex wireSolution = graph.getVertex(wire);
 
         TransportEdge plateGearEdge = graph.getEdge(ironIn, gearSolution);
-        assertEquals(1.0, graph.getEdgeWeight(plateGearEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(plateGearEdge), DELTA);
 
         TransportEdge plateWireEdge = graph.getEdge(ironIn, wireSolution);
-        assertEquals(1.0, graph.getEdgeWeight(plateWireEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(plateWireEdge), DELTA);
     }
 
     @Test
@@ -214,7 +263,7 @@ public class GraphSolverTest {
         anchor.name = "iron-plate-anchor";
         anchor.inputItems.put("iron-plate", 2.0);
         anchor.outputItems.put("iron-gear", 1.0);
-        anchor.outputItems.put("item-wire", 1.0);
+        anchor.outputItems.put("iron-wire", 1.0);
         anchor.time = 1;
 
         Recipe gear = new Recipe();
@@ -229,40 +278,41 @@ public class GraphSolverTest {
         wire.outputItems.put("item-fin", 1.0);
         wire.time = 1;
 
-        TransportGraph graph = solver.solve("output-item-fin", 2.0, anchor, gear, wire);
+        TransportGraph graph = solver.bind("output-item-fin", 2.0)
+                .solve(anchor, gear, wire);
         Main.print(graph);
 //        assertValid(graph);
 
         TransportVertex ironIn = graph.getVertex("input-iron-plate");
-        assertEquals(2.0, ironIn.rate(), 0.0);
+        assertEquals(2.0, ironIn.rate(), DELTA);
 
         TransportVertex anchorSolution = graph.getVertex("iron-plate-anchor");
-        assertEquals(1.0, anchorSolution.rate(), 0.0);
+        assertEquals(1.0, anchorSolution.rate(), DELTA);
 
         TransportVertex gearSolution = graph.getVertex(gear);
-        assertEquals(1.0, gearSolution.rate(), 0.0);
+        assertEquals(1.0, gearSolution.rate(), DELTA);
 
         TransportVertex wireSolution = graph.getVertex(wire);
-        assertEquals(1.0, wireSolution.rate(), 0.0);
+        assertEquals(1.0, wireSolution.rate(), DELTA);
 
         TransportVertex finOut = graph.getVertex("output-item-fin");
-        assertEquals(2.0, finOut.rate(), 0.0);
+        assertEquals(2.0, finOut.rate(), DELTA);
 
 
         TransportEdge plateAnchorEdge = graph.getEdge(ironIn, anchorSolution);
-        assertEquals(2.0, graph.getEdgeWeight(plateAnchorEdge), 0.0);
+        assertEquals(2.0, graph.getEdgeWeight(plateAnchorEdge), DELTA);
 
         TransportEdge anchorGearEdge = graph.getEdge(anchorSolution, gearSolution);
-        assertEquals(1.0, graph.getEdgeWeight(anchorGearEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(anchorGearEdge), DELTA);
 
         TransportEdge anchorWireEdge = graph.getEdge(anchorSolution, wireSolution);
-        assertEquals(1.0, graph.getEdgeWeight(anchorWireEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(anchorWireEdge), DELTA);
 
         TransportEdge wireFinEdge = graph.getEdge(wireSolution, finOut);
-        assertEquals(1.0, graph.getEdgeWeight(wireFinEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(wireFinEdge), DELTA);
 
         TransportEdge gearFinEdge = graph.getEdge(gearSolution, finOut);
-        assertEquals(1.0, graph.getEdgeWeight(gearFinEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(gearFinEdge), DELTA);
     }
 
     @Test
@@ -288,7 +338,7 @@ public class GraphSolverTest {
         combine.outputItems.put("item-fin", 1.0);
         combine.time = 1;
 
-        TransportGraph graph = solver.solve("output-item-fin", 1.0, gear, wire, combine);
+        TransportGraph graph = solver.bind("output-item-fin", 1.0).solve(gear, wire, combine);
         Main.print(graph);
 //        assertValid(graph);
 
@@ -299,33 +349,33 @@ public class GraphSolverTest {
 //        assertEquals(2.0, ironIn.rate(), 0.0);
 
         TransportVertex gearSolution = graph.getVertex(gear);
-        assertEquals(1.0, gearSolution.rate(), 0.0);
+        assertEquals(1.0, gearSolution.rate(), DELTA);
 
         TransportVertex wireSolution = graph.getVertex(wire);
-        assertEquals(1.0, wireSolution.rate(), 0.0);
+        assertEquals(1.0, wireSolution.rate(), DELTA);
 
         TransportVertex combineSolution = graph.getVertex(combine);
-        assertEquals(1.0, combineSolution.rate(), 0.0);
+        assertEquals(1.0, combineSolution.rate(), DELTA);
 
         TransportVertex fooOut = graph.getVertex("output-item-fin");
-        assertEquals(1.0, fooOut.rate(), 0.0);
+        assertEquals(1.0, fooOut.rate(), DELTA);
 
 
         TransportEdge plateGearEdge = graph.getEdge(ironIn, gearSolution);
-        assertEquals(1.0, graph.getEdgeWeight(plateGearEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(plateGearEdge), DELTA);
 
         TransportEdge plateWireEdge = graph.getEdge(ironIn, wireSolution);
-        assertEquals(1.0, graph.getEdgeWeight(plateWireEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(plateWireEdge), DELTA);
 
         TransportEdge gearEdge = graph.getEdge(gearSolution, combineSolution);
-        assertEquals(1.0, graph.getEdgeWeight(gearEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(gearEdge), DELTA);
 
         TransportEdge wireEdge = graph.getEdge(wireSolution, combineSolution);
-        assertEquals(1.0, graph.getEdgeWeight(wireEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(wireEdge), DELTA);
 
 
         TransportEdge finOutEdge = graph.getEdge(combineSolution, fooOut);
-        assertEquals(1.0, graph.getEdgeWeight(finOutEdge), 0.0);
+        assertEquals(1.0, graph.getEdgeWeight(finOutEdge), DELTA);
     }
 
     @Test
@@ -351,7 +401,7 @@ public class GraphSolverTest {
         bar.time = 1;
 
         try {
-            TransportGraph graph = solver.solve("output-item-foo", 2.0, smelting, foo, bar);
+            TransportGraph graph = solver.bind("output-item-foo", 2.0).solve(smelting, foo, bar);
             fail("Should have thrown an UndefinedSolutionException");
         } catch (UndefinedSolutionException e) {
             // expected
@@ -381,7 +431,8 @@ public class GraphSolverTest {
         use2.time = 1;
 
         try {
-            TransportGraph graph = solver.solve("iron-source-1", 2.0, smelting, use1, use2);
+            TransportGraph graph = solver.bind("iron-source-1", 2.0)
+                    .solve(smelting, use1, use2);
             fail("Should have thrown an UndefinedSolutionException");
         } catch (UndefinedSolutionException e) {
             // expected
@@ -415,7 +466,8 @@ public class GraphSolverTest {
         light.outputItems.put("petroleum-gas", 20.0);
         light.time = 3.0;
 
-        TransportGraph graph = solver.solve("output-petroleum-gas", 100.0, refine, heavy, light);
+        TransportGraph graph = solver.bind("output-petroleum-gas", 100.0)
+                .solve(refine, heavy, light);
 //        assertValid(graph);
 
         Main.print(graph);
@@ -427,10 +479,10 @@ public class GraphSolverTest {
         TransportVertex lightSolution = graph.getVertex(refine);
         TransportVertex petroleumOut = graph.getVertex("output-petroleum-gas");
 
-        assertEquals(122.222, waterIn.getRecipe().outputRate("water"), 0.01);
-        assertEquals(111.111, oilIn.getRecipe().outputRate("crude-oil"), 0.01);
+        assertEquals(122.222, waterIn.getRecipe().outputRate("water"), DELTA);
+        assertEquals(111.111, oilIn.getRecipe().outputRate("crude-oil"), DELTA);
 
-        assertEquals(100.0, petroleumOut.getRecipe().inputRate("petroleum-gas"), 0.0);
+        assertEquals(100.0, petroleumOut.getRecipe().inputRate("petroleum-gas"), DELTA);
 
     }
 }
