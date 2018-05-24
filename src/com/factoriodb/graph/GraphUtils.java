@@ -5,30 +5,18 @@ import com.factoriodb.model.CrafterType;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.CholeskyDecomposition;
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.QRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.EdgeReversedGraph;
-import org.jgrapht.traverse.BreadthFirstIterator;
-import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
 
 /**
  * @author austinjones
@@ -134,14 +122,25 @@ public class GraphUtils {
         }
 
         double[][] matrixArray = matrix.toArray(new double[0][0]);
-        double[] rhsArray = new double[matrixArray.length];
+        RealMatrix coefficientsSmall = new Array2DRowRealMatrix(matrixArray, false);
+
+        // we need a square matrix so we can use LU decomposition, which provides exact results
+        // create an identity matrix, and overwrite the equations.
+        int n = Math.max(matrix.size(), width);
+        double[][] finalMatrix = new double[n][n];
+        for(int i = 0; i < n; i++) {
+            finalMatrix[i][i] = 1.0;
+        }
+
+        double[] rhsArray = new double[n];
         for (int i = 0; i < rhs.size(); i++) {
             rhsArray[i] = rhs.get(i);
         }
 
-        RealMatrix coefficients = new Array2DRowRealMatrix(matrixArray, false);
+        coefficientsSmall.copySubMatrix(0, matrix.size() - 1, 0, width - 1, finalMatrix);
+        RealMatrix coefficentsSquare = new Array2DRowRealMatrix(finalMatrix);
 
-        DecompositionSolver solver = new QRDecomposition(coefficients).getSolver();
+        DecompositionSolver solver = new LUDecomposition(coefficentsSquare).getSolver();
         RealVector constants = new ArrayRealVector(rhsArray, false);
         RealVector solution = solver.solve(constants);
         System.out.println(solution);
@@ -157,6 +156,8 @@ public class GraphUtils {
 
         return rg;
     }
+
+
 
 
     public static RecipeGraph connectRecipes(RecipeGraph recipeGraph) {

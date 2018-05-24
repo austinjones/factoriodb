@@ -40,20 +40,21 @@ public class DataParser {
     // https://github.com/wube/factorio-data/tree/master/base/prototypes/recipe
 
 	public static void main(String[] args) throws IOException {
-		File itemFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/name/name.lua");
+	    String dataDir = args[0];
+		File itemFile = new File(dataDir + "/base/prototypes/name/name.lua");
 		File moduleFile = new File("lua/module.lua");
-		File recipeFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/recipe/recipe.lua");
-		File fluidFile = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/fluid/fluid.lua");
+		File recipeFile = new File(dataDir + "/base/prototypes/recipe/recipe.lua");
+		File fluidFile = new File(dataDir + "/base/prototypes/fluid/fluid.lua");
 		File testFile = new File("test/parser-test.txt");
 
-		File recipeFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/recipe/");
-		File fluidFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/fluid/");
-		File itemFolder = new File("C:/Program Files (x86)/Steam/SteamApps/common/Factorio/data/base/prototypes/name/");
+		File recipeFolder = new File(dataDir + "/base/prototypes/recipe/");
+		File fluidFolder = new File(dataDir + "/base/prototypes/fluid/");
+		File itemFolder = new File(dataDir + "/base/prototypes/item/");
 		
 		writeJsonFile(readLuaFile(testFile, "foo"), new File("json/test.json"));
 		writeJsonFile(readLuaDirectory(recipeFolder, "recipe"), new File("json/recipes.json"));
 		writeJsonFile(readLuaFile(moduleFile, "module"), new File("json/modules.json"));
-		writeJsonFile(readLuaDirectory(itemFolder, "name"), new File("json/items.json"));
+		writeJsonFile(readLuaDirectory(itemFolder, "item"), new File("json/items.json"));
 		writeJsonFile(readLuaDirectory(fluidFolder, "fluid"), new File("json/fluids.json"));
 	}
 	
@@ -166,6 +167,10 @@ public class DataParser {
 		});
 		
 		JsonArray output = new JsonArray();
+		if (files == null) {
+		    return output;
+        }
+
 		for( File f : files ) {
 			JsonElement element = readLuaFile(f, typeFilter);
 			

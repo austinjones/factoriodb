@@ -16,6 +16,7 @@
     },
     "max_temperature": 100.0,
     "icon": "__base__/graphics/icons/fluid/crude-oil.png",
+    "icon_size": 32.0,
     "pressure_to_speed_ratio": 0.4,
     "flow_to_energy_ratio": 0.59,
     "order": "a[fluid]-b[crude-oil]"
@@ -37,6 +38,7 @@
     },
     "max_temperature": 100.0,
     "icon": "__base__/graphics/icons/fluid/heavy-oil.png",
+    "icon_size": 32.0,
     "pressure_to_speed_ratio": 0.4,
     "flow_to_energy_ratio": 0.59,
     "order": "a[fluid]-c[heavy-oil]"
@@ -58,6 +60,7 @@
     },
     "max_temperature": 100.0,
     "icon": "__base__/graphics/icons/fluid/light-oil.png",
+    "icon_size": 32.0,
     "pressure_to_speed_ratio": 0.4,
     "flow_to_energy_ratio": 0.59,
     "order": "a[fluid]-d[light-oil]"
@@ -79,6 +82,7 @@
     },
     "max_temperature": 100.0,
     "icon": "__base__/graphics/icons/fluid/petroleum-gas.png",
+    "icon_size": 32.0,
     "pressure_to_speed_ratio": 0.4,
     "flow_to_energy_ratio": 0.59,
     "order": "a[fluid]-e[petroleum-gas]"
@@ -100,6 +104,7 @@
     },
     "max_temperature": 100.0,
     "icon": "__base__/graphics/icons/fluid/lubricant.png",
+    "icon_size": 32.0,
     "pressure_to_speed_ratio": 0.4,
     "flow_to_energy_ratio": 0.59,
     "order": "e[lubricant]"
@@ -121,6 +126,7 @@
     },
     "max_temperature": 100.0,
     "icon": "__base__/graphics/icons/fluid/sulfuric-acid.png",
+    "icon_size": 32.0,
     "pressure_to_speed_ratio": 0.4,
     "flow_to_energy_ratio": 0.59,
     "order": "a[fluid]-f[sulfuric-acid]"

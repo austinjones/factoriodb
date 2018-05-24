@@ -20,10 +20,24 @@ public class OptionFactory {
 
     public static Collection<? extends ConnectionOption> connectionOptions(String item, double rate) {
         Collection<ConnectionOption> options = new ArrayList<>();
-        options.addAll(new Belt(item).options(rate));
-        options.addAll(new Inserter(item).options(rate));
-        options.addAll(new Pipe(item).options(rate));
+
+        if (isFluid(item)) {
+            options.addAll(new Pipe(item).options(rate));
+        } else {
+            options.addAll(new Belt(item).options(rate));
+            options.addAll(new Inserter(item).options(rate));
+        }
 
         return options;
+    }
+
+    private static boolean isFluid(String item) {
+        // TODO: load from classpath resource, parse out fluid names
+        return item.equals("crude-oil")
+                || item.equals("heavy-oil")
+                || item.equals("light-oil")
+                || item.equals("petroleum-gas")
+                || item.equals("lubricant")
+                || item.equals("sulfuric-acid");
     }
 }

@@ -17,6 +17,8 @@ import com.factoriodb.recipe.RecipeUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collections;
 public class Main {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -25,47 +27,47 @@ public class Main {
 		System.out.println("Missing recipes: " + m.getMissingRecipes());
 
 
-//        System.out.println("advanced-oil:");
-//        advancedOil(m);
-//
-//        System.out.println("");
-//        System.out.println("");
-//        System.out.println("");
-//
-//        System.out.println("basic-oil:");
-//        basicOil(m);
-//
-//        System.out.println("");
-//        System.out.println("");
-//        System.out.println("");
-//
-//        System.out.println("electronic-circuit:");
-//        circuits(m);
-//
-//        System.out.println("");
-//        System.out.println("");
-//        System.out.println("");
-//
-//        System.out.println("iron-plate:");
-//        ironPlate(m);
-//
-//		System.out.println("");
-//		System.out.println("");
-//		System.out.println("");
-//
-//		System.out.println("science-pack-1:");
-//		sci1(m);
-//
-//		System.out.println("");
-//		System.out.println("");
-//		System.out.println("");
-//
-//		System.out.println("science-pack-2:");
-//		sci2(m);
-//
-//		System.out.println("");
-//        System.out.println("");
-//        System.out.println("");
+        System.out.println("advanced-oil:");
+        advancedOil(m);
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+
+        System.out.println("basic-oil:");
+        basicOil(m);
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+
+        System.out.println("electronic-circuit:");
+        circuits(m);
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+
+        System.out.println("iron-plate:");
+        ironPlate(m);
+
+		System.out.println("");
+		System.out.println("");
+		System.out.println("");
+
+		System.out.println("science-pack-1:");
+		sci1(m);
+
+		System.out.println("");
+		System.out.println("");
+		System.out.println("");
+
+		System.out.println("science-pack-2:");
+		sci2(m);
+
+		System.out.println("");
+        System.out.println("");
+        System.out.println("");
 //
 		System.out.println("iron-gear-wheel:");
 		gear(m);
@@ -75,7 +77,9 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve(ru.namedRecipe("basic-oil-processing"));
+        TransportGraph graph = solver
+                .bind("basic-oil-processing", "crude-oil", 10.0)
+                .solve(ru.namedRecipe("basic-oil-processing"));
         print(graph);
     }
 
@@ -83,8 +87,9 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve(
-                ru.namedRecipe("advanced-oil-processing"),
+        TransportGraph graph = solver.
+                bind("output-petroleum-gas", 100.0)
+                .solve(ru.namedRecipe("advanced-oil-processing"),
                 ru.namedRecipe("heavy-oil-cracking"),
                 ru.namedRecipe("light-oil-cracking"));
 
@@ -106,7 +111,9 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve(ru.recipe("iron-plate"));
+        TransportGraph graph = solver
+                .bind("output-iron-plate", 10000.0)
+                .solve(ru.recipe("iron-plate"));
 
         print(graph);
     }
@@ -115,7 +122,9 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve(ru.recipe("iron-gear-wheel"),
+        TransportGraph graph = solver
+                .bind("output-science-pack-1", 1.0)
+                .solve(ru.recipe("iron-gear-wheel"),
                 ru.recipe("science-pack-1"));
 
         print(graph);
@@ -125,7 +134,9 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.solve(ru.recipe("iron-gear-wheel"),
+        TransportGraph graph = solver
+                .bind("output-science-pack-2", 1.0)
+                .solve(ru.recipe("iron-gear-wheel"),
                 ru.recipe("inserter"),
                 ru.recipe("transport-belt"),
                 ru.recipe("science-pack-2"));
@@ -137,7 +148,9 @@ public class Main {
         RecipeUtils ru = new RecipeUtils(m);
         GraphSolver solver = new GraphSolver();
 
-        TransportGraph graph = solver.bind("output-iron-gear-wheel", 1).solve(ru.recipe("iron-gear-wheel"));
+        TransportGraph graph = solver
+                .bind("output-iron-gear-wheel", 1)
+                .solve(ru.recipe("iron-gear-wheel"));
 
         print(graph);
 	}
@@ -153,18 +166,26 @@ public class Main {
     }
 
     private static void print(TransportGraph g, TransportEdge e) {
-        String sourceName = g.getEdgeSource(e).getRecipe().toString();
-        String targetName = g.getEdgeTarget(e).getRecipe().toString();
-        System.out.println("  " + e.getItem() + ": " + sourceName + " -> " + targetName);
+        NumberFormat decimal = new DecimalFormat("0.00");
+        NumberFormat percent = new DecimalFormat("00.00");
+
+        String sourceName = g.getEdgeSource(e).name();
+        String targetName = g.getEdgeTarget(e).name();
+        double edgeFlow = g.getEdgeWeight(e);
+
+        System.out.println("  " + decimal.format(edgeFlow) + " x " + e.getItem() + ": " + sourceName + " -> " + targetName);
         for (ConnectionOption o : e.getSolutions()) {
-            System.out.println("     " + o.name() + ": " + o.output() + " / " + o.maxOutput());
+            double utilization = o.output() / o.maxOutput();
+            System.out.println("     " + (long)Math.ceil(o.count()) + " x (" +
+                    percent.format(100*utilization) + "%) " +
+                    o.name());
         }
     }
 
     private static void print(TransportVertex v) {
         System.out.println("" + v.toString());
         for (RecipeOption o : v.getSolutions()) {
-            System.out.println("     " + o.name() + " x " + o.count());
+            System.out.println("     " + o.count() + " x " + o.name());
         }
     }
 }

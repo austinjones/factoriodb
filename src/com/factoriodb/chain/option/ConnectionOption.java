@@ -38,6 +38,6 @@ public abstract class ConnectionOption extends EntityOption {
 //	}
 	
 	public String toString() {
-        return optionDescription;
+        return optionDescription + " x " + this.count();
     }
 }

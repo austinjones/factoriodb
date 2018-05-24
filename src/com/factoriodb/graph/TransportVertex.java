@@ -21,6 +21,10 @@ public class TransportVertex {
         return vertex.getRecipe();
     }
 
+    public String name() {
+        return vertex.getRecipe().getRecipe().name;
+    }
+
     public double rate() {
         return vertex.getRate();
     }
