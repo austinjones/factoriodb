@@ -1,4 +1,4 @@
-package com.factoriodb.graph;
+package com.factoriodb.recipe;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

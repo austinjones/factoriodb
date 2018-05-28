@@ -36,6 +36,8 @@ public class OptionFactory {
                 || item.equals("light-oil")
                 || item.equals("petroleum-gas")
                 || item.equals("lubricant")
-                || item.equals("sulfuric-acid");
+                || item.equals("sulfuric-acid")
+                || item.equals("water")
+                || item.equals("steam");
     }
 }

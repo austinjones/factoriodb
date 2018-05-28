@@ -4,6 +4,7 @@ import org.apache.commons.math3.linear.SingularMatrixException;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.factoriodb.recipe.Recipe;
 
 /**
  * @author austinjones

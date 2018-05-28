@@ -1,5 +1,7 @@
 package com.factoriodb.graph;
 
+import com.factoriodb.recipe.Recipe;
+
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.DefaultDirectedGraph;
 

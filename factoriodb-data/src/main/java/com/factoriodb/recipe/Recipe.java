@@ -1,5 +1,6 @@
-package com.factoriodb.graph;
+package com.factoriodb.recipe;
 
+import com.factoriodb.recipe.RatedRecipe;
 import com.factoriodb.model.CrafterType;
 
 import java.util.HashMap;
