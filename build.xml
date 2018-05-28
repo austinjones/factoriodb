@@ -9,7 +9,7 @@
 	         <arg value="-o"/>  
 	         <arg value="gen/com/factoriodb/luaparser"/>  
 	         <arg value="-package"/>  
-	         <arg value="com.factoriodb.luaparser"/>  
+	         <arg value="org.factoriodb.luaparser"/>
 	         <arg value="-visitor"/>
 	         <arg value="src-antlr/Lua.g4"/>  
 	    </java>

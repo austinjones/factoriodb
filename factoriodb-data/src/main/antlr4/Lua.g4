@@ -1,7 +1,7 @@
 grammar Lua;
 
 @header {
-    package com.factoriodb.luaparser;
+    package org.factoriodb.luaparser;
 }
 
 lua : value + EOF ;

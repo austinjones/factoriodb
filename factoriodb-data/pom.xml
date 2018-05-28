@@ -26,7 +26,7 @@
                 <version>4.7.1</version>
                 <configuration>
                     <visitor>true</visitor>
-                    <outputDirectory>src/main/generated/com/factoriodb/luaparser/</outputDirectory>
+                    <outputDirectory>${project.basedir}/src/main/generated/com/factoriodb/luaparser/</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -60,7 +60,7 @@
                         <configuration>
                             <url>https://github.com/wube/factorio-data/archive/${factoriodata.version}.zip</url>
                             <unpack>true</unpack>
-                            <outputDirectory>src/main/resources/generated</outputDirectory>
+                            <outputDirectory>${project.basedir}/src/main/resources/generated</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -78,10 +78,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.factoriodb.DataParser</mainClass>
+                    <mainClass>org.factoriodb.DataParser</mainClass>
                     <arguments>
-                        <argument>src/main/resources/generated/factorio-data-${factoriodata.version}/</argument>
-                        <argument>src/main/resources/generated/factorio-parsed-${factoriodata.version}/</argument>
+                        <argument>${project.basedir}/src/main/resources/generated/factorio-data-${factoriodata.version}/</argument>
+                        <argument>${project.basedir}/src/main/resources/generated/factorio-parsed-${factoriodata.version}/</argument>
                     </arguments>
                 </configuration>
             </plugin>
