@@ -16,6 +16,18 @@ public class OptionFactory {
         return Assembler.getInstance(r.getRecipe()).options(r);
     }
 
+    public static Collection<? extends ConnectionOption> transitOptions(String item, double rate) {
+        Collection<ConnectionOption> options = new ArrayList<>();
+
+        if (isFluid(item)) {
+            options.addAll(new Pipe(item).options(rate));
+        } else {
+            options.addAll(new Belt(item).options(rate));
+        }
+
+        return options;
+    }
+
     public static Collection<? extends ConnectionOption> connectionOptions(String item, double rate) {
         Collection<ConnectionOption> options = new ArrayList<>();
 
@@ -29,7 +41,7 @@ public class OptionFactory {
         return options;
     }
 
-    private static boolean isFluid(String item) {
+    public static boolean isFluid(String item) {
         // TODO: load from classpath resource, parse out fluid names
         return item.equals("crude-oil")
                 || item.equals("heavy-oil")

@@ -1,0 +1,24 @@
+#conduits:
+#  - name: bus
+#  - name: science-bus
+
+#preferences:
+#  inserter: inserter
+#  belt: transport-belt
+#  assembler: assembling-machine
+
+recipes:
+  - name: iron-plate
+  - name: copper-plate
+  - name: iron-gear-wheel
+  - name: copper-cable
+
+  - name: electronic-circuit
+  - name: science-pack-1
+    rate: 4
+
+  - name: inserter
+  - name: transport-belt
+
+  - name: science-pack-2
+    rate: 4

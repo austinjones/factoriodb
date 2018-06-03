@@ -105,17 +105,32 @@ public class GraphUtils {
                 throw new NullPointerException("Unknown recipe from constraint " + constraint.recipe);
             }
 
-            String item = constraint.item;
-            if (item == null && r.inputItems.size() == 1) {
-                item = r.inputItems.keySet().iterator().next();
-            }
+            double rate = 0;
+            if (constraint.type == GraphSolver.ConstraintType.INPUT) {
+                String item = constraint.item;
+                if (item == null && r.inputItems.size() == 1) {
+                    item = r.inputItems.keySet().iterator().next();
+                }
 
-            if (!r.inputItems.containsKey(item)) {
-                throw new NullPointerException("Unknown item from constraint on recipe " + constraint.recipe);
+                if (!r.inputItems.containsKey(item)) {
+                    throw new NullPointerException("Unknown item " + constraint.item + " from constraint on recipe " + constraint.recipe);
+                }
+
+                rate = constraint.flow / r.inputRate(item);
+            } else if (constraint.type == GraphSolver.ConstraintType.OUTPUT) {
+                String item = constraint.item;
+                if (item == null && r.outputItems.size() == 1) {
+                    item = r.outputItems.keySet().iterator().next();
+                }
+
+                if (!r.outputItems.containsKey(item)) {
+                    throw new NullPointerException("Unknown item from constraint on recipe " + constraint.recipe);
+                }
+
+                rate = constraint.flow / r.outputRate(item);
             }
 
             int recipeIndex = recipes.indexOf(r);
-            double rate = constraint.flow / r.inputRate(item);
             line[edges.size() + recipeIndex] = 1.0;
 
             matrix.add(line);

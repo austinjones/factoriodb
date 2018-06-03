@@ -10,7 +10,12 @@ import java.util.List;
  * @author austinjones
  */
 public class GraphSolver {
+    public enum ConstraintType {
+        INPUT, OUTPUT
+    }
+
     public static class Constraint {
+        ConstraintType type = ConstraintType.INPUT;
         String recipe;
         String item;
         double flow;
@@ -22,14 +27,19 @@ public class GraphSolver {
     }
 
     public GraphSolver bind(String recipe, double flow) {
-        return bind(recipe, null, flow);
+        return bind(recipe, null, flow, ConstraintType.INPUT);
     }
 
     public GraphSolver bind(String recipe, String item, double flow) {
+        return bind(recipe, item, flow, ConstraintType.INPUT);
+    }
+
+    public GraphSolver bind(String recipe, String item, double flow, ConstraintType type) {
         Constraint c = new Constraint();
         c.recipe = recipe;
         c.item = item;
         c.flow = flow;
+        c.type = type;
 
         constraints.add(c);
         return this;

@@ -27,9 +27,9 @@ public class Belt {
 
 	public Collection<? extends ConnectionOption> options(double rate) {
 		List<BeltOption> options = new ArrayList<>();
-		options.add(new BeltOption("transport-belt-1", SPEED_YELLOW, rate));
-		options.add(new BeltOption("transport-belt-2", SPEED_RED, rate));
-		options.add(new BeltOption("transport-belt-3", SPEED_BLUE, rate));
+		options.add(new BeltOption("transport-belt", SPEED_YELLOW, rate));
+		options.add(new BeltOption("fast-transport-belt", SPEED_RED, rate));
+		options.add(new BeltOption("express-transport-belt", SPEED_BLUE, rate));
 		return options;
 	}
 	
