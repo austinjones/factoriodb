@@ -56,6 +56,26 @@ public class CliMain {
             }
         }
 
+        for (ConstraintYaml recipe : in.getOutputs()) {
+//            List<String> inputSections = section.getInput();
+            Recipe r = ru.output(recipe.getItem(), 1.0);
+            recipes.add(r);
+
+            if (recipe.getRate() != null) {
+                solver.bind(r.name, recipe.getItem(), recipe.getRate(), GraphSolver.ConstraintType.INPUT);
+            }
+        }
+
+        for (ConstraintYaml recipe : in.getInputs()) {
+//            List<String> inputSections = section.getInput();
+            Recipe r = ru.input(recipe.getItem(), 1.0);
+            recipes.add(r);
+
+            if (recipe.getRate() != null) {
+                solver.bind(r.name, recipe.getItem(), recipe.getRate(), GraphSolver.ConstraintType.OUTPUT);
+            }
+        }
+
         TransportGraph graph = solver.solve(recipes.toArray(new Recipe[]{}));
         Main.print_small(graph, new PrintOption());
     }

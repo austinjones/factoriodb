@@ -36,9 +36,9 @@ public class RecipeUtils {
     public Recipe output(String item, double rate) {
 	    Recipe r = new Recipe();
 	    r.crafterType = CrafterType.OUTPUT;
-	    r.name = "output-item";
+	    r.name = "output-" + item;
 	    r.time = 1;
-	    r.outputItems.put(item, rate);
+	    r.inputItems.put(item, rate);
 
 	    return r;
     }
@@ -46,7 +46,7 @@ public class RecipeUtils {
     public Recipe input(String item, double rate) {
         Recipe r = new Recipe();
         r.crafterType = CrafterType.INPUT;
-        r.name = "input-item";
+        r.name = "input-" + item;
         r.time = 1;
         r.outputItems.put(item, rate);
 

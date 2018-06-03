@@ -7,6 +7,19 @@
 #  belt: transport-belt
 #  assembler: assembling-machine
 
+outputs:
+  - item: science-pack-1
+    rate: 4
+
+  - item: science-pack-2
+    rate: 4
+
+  - item: inserter
+    rate: 8
+
+  - item: transport-belt
+    rate: 8
+
 recipes:
   - name: iron-plate
   - name: copper-plate
@@ -15,10 +28,8 @@ recipes:
 
   - name: electronic-circuit
   - name: science-pack-1
-    rate: 4
 
   - name: inserter
   - name: transport-belt
 
   - name: science-pack-2
-    rate: 4
